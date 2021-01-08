@@ -8,7 +8,14 @@ object Main extends App {
   val capiDomain = args(1)
   val path = args(2)
 
-//  val article = write[Article](Article.fromCapiPath(capiDomain, capiKey)(path))
-  val tag = write[Tag](Tag.fromCapiPath(capiDomain, capiKey)(path))
-  println(tag)
+  val article = Article.fromCapiPath(capiDomain, capiKey) _
+  val tag = Tag.fromCapiPath(capiDomain, capiKey) _
+
+  val generated =
+    if (path.contains('/'))
+      write[Article](article(path))
+    else
+      write[Tag](tag(path))
+
+  println(generated)
 }

@@ -14,3 +14,13 @@ lazy val root = (project in file("."))
       jsoup
     )
   )
+
+// Sub-project to import content into SF Knowledge
+lazy val legacyContentImport = (project in file("legacy-content-import"))
+  .settings(
+    name := "legacy-content-import",
+    libraryDependencies ++= Seq(
+      http,
+      upickle
+    )
+  )

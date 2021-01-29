@@ -41,8 +41,9 @@ object Article {
 
       val tagsToInclude = result("tags").arr.toList.filterNot(tag => excludedTags.contains(tag("id").str))
 
-      def tagsOfType(typeName: String) =
-        tagsToInclude.filter(tag => tag("type").str == typeName).map(_("webTitle").str)
+      def tagsOfType(typeName: String) = tagsToInclude collect {
+        case tag if tag("type").str == typeName => tag("webTitle").str
+      }
 
       Article(
         title = result("webTitle").str,

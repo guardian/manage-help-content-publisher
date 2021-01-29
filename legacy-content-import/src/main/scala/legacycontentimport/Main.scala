@@ -7,6 +7,7 @@ object Main extends App {
 
   val articles = Article.fromCapiHelpSection(capiDomain, capiKey)
   articles foreach { article =>
-    println(s"""${article.url},"${article.title.replace("\"", "'")}",${article.publicationDate}""")
+    println(s"""${article.url},"${article.title.replace("\"", "'")}",${article.publicationDate},"${article.keywords
+      .mkString(", ")}","${article.series.mkString}","${article.tone.mkString}","${article.blog.mkString}"""")
   }
 }

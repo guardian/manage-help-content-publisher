@@ -1,4 +1,4 @@
-package legacycontentimport
+package legacycontentimport.audit
 
 import scalaj.http.Http
 

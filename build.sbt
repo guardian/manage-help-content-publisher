@@ -21,6 +21,7 @@ lazy val legacyContentImport = (project in file("legacy-content-import"))
     name := "legacy-content-import",
     libraryDependencies ++= Seq(
       http,
-      upickle
+      ujson,
+      zip
     )
   )

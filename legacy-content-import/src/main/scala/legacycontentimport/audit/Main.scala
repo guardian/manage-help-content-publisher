@@ -1,4 +1,4 @@
-package legacycontentimport
+package legacycontentimport.audit
 
 object Main extends App {
 

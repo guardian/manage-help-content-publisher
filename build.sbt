@@ -7,7 +7,6 @@ lazy val root = (project in file("."))
     name := "manage-help-content-publisher",
     libraryDependencies ++= Seq(
       http,
-      upickle,
       circeCore,
       circeGeneric,
       circeParser,

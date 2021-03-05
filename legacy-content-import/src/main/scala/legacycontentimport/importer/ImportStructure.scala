@@ -16,14 +16,22 @@ case class ImportStructure(csv: String, articleBodies: Seq[ByteSource])
 
 object ImportStructure {
 
-  def addPath(loadArticle: String => Article)(importStructure: ImportStructure, path: String): ImportStructure = {
+  def addPath(
+      loadArticle: String => ArticleAndTopics
+  )(importStructure: ImportStructure, path: String): ImportStructure = {
 
     val article = loadArticle(path)
     val pathToBody = s"body/${article.resourceName}.html"
+
+    /*
+     * See examples in
+     * https://help.salesforce.com/articleView?id=sf.knowledge_article_importer_02csv.htm
+     */
     val csvRow = Seq(
       article.resourceName,
       article.title,
-      pathToBody
+      pathToBody,
+      article.topics.mkString("+")
     ).mkString("\"", "\",\"", "\"")
 
     ImportStructure(

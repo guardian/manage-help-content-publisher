@@ -12,7 +12,10 @@ import scala.io.Source
   * <ol>
   * <li>Capi key</li>
   * <li>Capi domain</li>
-  * <li>File holding line-separated Capi article paths</li>
+  * <li>CSV file holding a row for each Capi article path and its new Help Centre topics<br />
+  * For example:<br />
+  * <code>help/2021/feb/08/getting-started-with-your-digital-subscription,The_Guardian_apps,Billing</code>
+  * </li>
   * </ol>
   */
 object Main extends App {
@@ -21,18 +24,28 @@ object Main extends App {
   val capiDomain = args(1)
   val articlePathsFile = new File(args(2))
 
-  val article = Article.fromCapiPath(capiDomain, capiKey) _
-
-  val articlePaths = {
-    val source = Source.fromFile(articlePathsFile)
-    val paths = source.getLines.toList
-    source.close()
-    paths
+  def article(articleData: String): ArticleAndTopics = {
+    val dataFields = articleData.split(",")
+    ArticleAndTopics(
+      article = Article.fromCapiPath(capiDomain, capiKey)(dataFields.head),
+      topics = dataFields.tail.toSet
+    )
   }
 
-  val csvHeader = "UrlName,Title,Body__c"
+  val articleData = {
+    val source = Source.fromFile(articlePathsFile)
+    val rows = source.getLines.toList
+    source.close()
+    rows
+  }
 
-  val importStructure = articlePaths.foldLeft(ImportStructure(csvHeader, Nil))(ImportStructure.addPath(article))
+  /*
+   * See
+   * https://help.salesforce.com/articleView?id=sf.knowledge_article_importer_02csv.htm
+   */
+  val csvHeader = "UrlName,Title,Body__c,DataCategoryGroup.Help_Centre_Topics"
+
+  val importStructure = articleData.foldLeft(ImportStructure(csvHeader, Nil))(ImportStructure.addPath(article))
 
   private val outputZip = File.createTempFile("legacy-help-articles", ".zip")
   private val properties = new File("legacy-content-import/src/main/resources/import.properties")

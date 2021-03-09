@@ -3,6 +3,19 @@
  */
 
 
+// Delete draft articles
+
+List<Knowledge__kav> draft = [
+  SELECT KnowledgeArticleId
+  FROM Knowledge__kav
+  WHERE PublishStatus = 'Draft'
+];
+
+for (Knowledge__kav article: draft) {
+  KbManagement.PublishingService.deleteDraftArticle(article.KnowledgeArticleId);
+}
+
+
 // Cannot delete live articles so archive them instead
 
 List<Knowledge__kav> live = [
@@ -26,17 +39,4 @@ List<Knowledge__kav> archived = [
 
 for (Knowledge__kav article: archived) {
   KbManagement.PublishingService.deleteArchivedArticle(article.KnowledgeArticleId);
-}
-
-
-// Delete draft articles
-
-List<Knowledge__kav> draft = [
-  SELECT KnowledgeArticleId
-  FROM Knowledge__kav
-  WHERE PublishStatus = 'Draft'
-];
-
-for (Knowledge__kav article: draft) {
-  KbManagement.PublishingService.deleteDraftArticle(article.KnowledgeArticleId);
 }

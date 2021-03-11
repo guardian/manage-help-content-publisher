@@ -1,6 +1,6 @@
 import Dependencies._
 
-ThisBuild / scalaVersion := "2.13.4"
+ThisBuild / scalaVersion := "2.13.5"
 
 lazy val root = (project in file("."))
   .settings(
@@ -10,7 +10,13 @@ lazy val root = (project in file("."))
       circeCore,
       circeGeneric,
       circeParser,
-      jsoup
+      jsoup,
+      ujson,
+      upickle,
+      awsLambda,
+      awsEvents,
+      s3,
+      utest % Test
     )
   )
 
@@ -24,3 +30,13 @@ lazy val legacyContentImport = (project in file("legacy-content-import"))
       zip
     )
   )
+
+testFrameworks += new TestFramework("utest.runner.Framework")
+
+assemblyMergeStrategy in assembly := {
+  case "module-info.class"                                  => MergeStrategy.discard
+  case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}

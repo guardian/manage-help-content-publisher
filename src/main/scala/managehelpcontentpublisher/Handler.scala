@@ -75,7 +75,7 @@ object Handler {
     ujson.Obj(
       "title" -> article.title,
       "body" -> HtmlToJson(article.body),
-      "topics" -> article.topics.map(topic => ujson.Obj("path" -> topic.path, "name" -> topic.name))
+      "topics" -> article.topics.map(topic => ujson.Obj("path" -> topic.path, "title" -> topic.name))
     )
 
   private def storeInS3(s3: S3Client, bucketName: String, folder: String)(

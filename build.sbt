@@ -6,6 +6,7 @@ lazy val root = (project in file("."))
   .enablePlugins(RiffRaffArtifact)
   .settings(
     name := "manage-help-content-publisher",
+    assemblyJarName := s"${name.value}.jar",
     riffRaffPackageType := assembly.value,
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),

@@ -1,6 +1,6 @@
 Transform: AWS::Serverless-2016-10-31
 
-Description: Publishes content from Salesforce Knowledge to manage-frontend.
+Description: Publishes Help Centre content from Salesforce Knowledge to manage-frontend.
 
 Parameters:
   Stage:
@@ -35,7 +35,7 @@ Resources:
         Bucket: support-service-lambdas-dist
         Key: !Sub membership/${Stage}/contact-us-api/contact-us-api.jar
       Timeout: 30
-      MemorySize: 128
+      MemorySize: 256
       Events:
         ApiEvent:
           Type: Api

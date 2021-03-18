@@ -31,7 +31,17 @@ Resources:
       FunctionName: !Sub ${AppName}-${Stage}
       Description: >
         Codebase: https://github.com/guardian/manage-help-content-publisher.
-      Policies: AWSLambdaExecute
+      Policies:
+        - Statement:
+            - Sid: S3BucketPolicy
+              Effect: Allow
+              Action:
+                - s3:ListBucket
+                - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
+              Resource:
+                - !Sub arn:aws:s3:::manage-help-content/${Stage}/*
       Handler: managehelpcontentpublisher.Handler::handleRequest
       Runtime: java11
       CodeUri:

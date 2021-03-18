@@ -29,13 +29,16 @@ Resources:
     DependsOn: LogGroup
     Properties:
       FunctionName: !Sub ${AppName}-${Stage}
+      Description: >
+        Codebase: https://github.com/guardian/manage-help-content-publisher.
+      Policies: AWSLambdaExecute
       Handler: managehelpcontentpublisher.Handler::handleRequest
       Runtime: java11
       CodeUri:
-        Bucket: support-service-lambdas-dist
-        Key: !Sub membership/${Stage}/contact-us-api/contact-us-api.jar
+        Bucket: membership-dist
+        Key: !Sub membership/${Stage}/${AppName}/${AppName}.jar
       Timeout: 30
-      MemorySize: 256
+      MemorySize: 2048
       Events:
         ApiEvent:
           Type: Api

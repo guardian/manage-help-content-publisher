@@ -10,7 +10,7 @@ lazy val root = (project in file("."))
     riffRaffPackageType := assembly.value,
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
-    riffRaffManifestProjectName := "manage-help-content-publisher",
+    riffRaffManifestProjectName := s"${name.value}",
     riffRaffArtifactResources += (file("cfn.yaml"), "cfn/cfn.yaml"),
     libraryDependencies ++= Seq(
       http,
@@ -23,6 +23,7 @@ lazy val root = (project in file("."))
       awsLambda,
       awsEvents,
       s3,
+      slf4jNop % Runtime,
       utest % Test
     )
   )

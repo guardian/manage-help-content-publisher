@@ -88,6 +88,7 @@ object Handler {
           .builder()
           .bucket(bucketName)
           .key(s"$folder/$fileName")
+          .contentType("application/json")
           .build(),
         RequestBody.fromString(content.render())
       )

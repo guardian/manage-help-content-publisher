@@ -7,9 +7,10 @@ import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.Region.EU_WEST_1
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
-
-import scala.util.Try
 import upickle.default._
+
+import scala.sys.env
+import scala.util.Try
 
 object Handler {
 
@@ -19,6 +20,7 @@ object Handler {
     def logInfo(message: String): Unit = logger.log(s"INFO: $message")
     def logError(message: String): Unit = logger.log(s"ERROR: $message")
 
+    logInfo(s"Using config: $config")
     logInfo(s"Input: ${event.getBody}")
     val response = result(event.getBody) match {
       case Left(e) =>
@@ -32,17 +34,19 @@ object Handler {
     response
   }
 
-  def main(args: Array[String]): Unit =
+  def main(args: Array[String]): Unit = {
+    println(s"Using config: $config")
     result(args(0)) match {
       case Left(e)    => println(s"Failed: ${e.reason}")
       case Right(obj) => println(s"Success!: ${obj.render(indent = 2)}")
     }
+  }
 
   private case class AwsConfig(region: Region, bucketName: String, articlesFolder: String, topicsFolder: String)
   private case class Config(stage: String, awsConfig: AwsConfig)
 
   private val config = {
-    val stage = "DEV"
+    val stage = env.getOrElse("stage", "DEV")
     Config(
       stage,
       AwsConfig(

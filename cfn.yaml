@@ -47,6 +47,9 @@ Resources:
       CodeUri:
         Bucket: membership-dist
         Key: !Sub membership/${Stage}/${AppName}/${AppName}.jar
+      Environment:
+        Variables:
+          stage: !Ref Stage
       Timeout: 30
       MemorySize: 2048
       Events:

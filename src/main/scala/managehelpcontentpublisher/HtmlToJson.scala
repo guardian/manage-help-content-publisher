@@ -63,7 +63,7 @@ object HtmlToJson {
     )(body)
   }
 
-  private def htmlToJson(n: Node): ujson.Obj =
+  private def htmlToJson(n: Node): ujson.Value =
     n match {
       case t: TextNode => ujson.Obj("element" -> "text", "content" -> t.text)
       case e: Element  => toJson(e)

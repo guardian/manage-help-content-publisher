@@ -19,7 +19,7 @@ object InputArticle {
   implicit val reader: Reader[InputArticle] = macroR
 }
 
-case class DataCategory(name: String)
+case class DataCategory(name: String, publishedArticles: Seq[InputArticle])
 
 object DataCategory {
   implicit val reader: Reader[DataCategory] = macroR

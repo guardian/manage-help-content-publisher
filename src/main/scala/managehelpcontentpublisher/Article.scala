@@ -1,5 +1,6 @@
 package managehelpcontentpublisher
 
+import managehelpcontentpublisher.SalesforceCleaner.cleanCustomFieldName
 import upickle.default._
 
 case class Article(title: String, body: ujson.Value, path: String, topics: Seq[ArticleTopic])
@@ -23,7 +24,7 @@ object ArticleTopic {
   implicit val writer: Writer[ArticleTopic] = macroW
 
   def fromSalesforceDataCategory(cat: ArticleDataCategory): ArticleTopic = ArticleTopic(
-    path = cat.name.stripSuffix("__c"),
+    path = cleanCustomFieldName(cat.name),
     title = cat.label
   )
 }

@@ -5,25 +5,21 @@ import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent
 
 import java.io.File
 import scala.io.Source
+import Logging._
 
 object Handler {
 
-  def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
-
-    val logger = context.getLogger
-    def logInfo(message: String): Unit = logger.log(s"INFO: $message")
-    def logError(message: String): Unit = logger.log(s"ERROR: $message")
-
-    logInfo(s"Input: ${event.getBody}")
-    val response = publishContents(event.getBody) match {
+  def handleRequest(request: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
+    logRequest(context, request)
+    val response = publishContents(request.getBody) match {
       case Left(e) =>
-        logError(e.reason)
+        logError(context, e.reason)
         new APIGatewayProxyResponseEvent().withStatusCode(500).withBody(e.reason)
       case Right(published) =>
-        published.foreach(item => logInfo(s"Wrote to '${item.path}': ${item.content}"))
+        published.foreach(logPublished(context))
         new APIGatewayProxyResponseEvent().withStatusCode(204)
     }
-    logInfo(s"Response: ${response.toString}")
+    logResponse(context, response)
     response
   }
 

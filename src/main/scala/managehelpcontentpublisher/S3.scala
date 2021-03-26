@@ -1,57 +1,59 @@
 package managehelpcontentpublisher
 
+import managehelpcontentpublisher.Config.config
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.regions.Region.EU_WEST_1
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.{GetObjectRequest, NoSuchKeyException, PutObjectRequest}
 
-import scala.sys.env
+import java.nio.charset.StandardCharsets.UTF_8
 import scala.util.Try
 
 object S3 {
 
-  private case class AwsConfig(region: Region, bucketName: String, articlesFolder: String, topicsFolder: String)
-  private case class Config(stage: String, awsConfig: AwsConfig)
+  private val client = S3Client.builder().region(config.aws.region).build()
 
-  private val config = {
-    val stage = env.getOrElse("stage", "DEV")
-    Config(
-      stage,
-      AwsConfig(
-        region = EU_WEST_1,
-        bucketName = "manage-help-content",
-        articlesFolder = s"$stage/articles",
-        topicsFolder = s"$stage/topics"
-      )
-    )
-  }
+  private def get(key: String): Either[Failure, Option[String]] =
+    Try(
+      client
+        .getObjectAsBytes(
+          GetObjectRequest
+            .builder()
+            .bucket(config.aws.bucketName)
+            .key(key)
+            .build()
+        )
+        .asString(UTF_8)
+    ).toEither
+      .map(Some(_))
+      .left
+      .flatMap {
+        case _: NoSuchKeyException => Right(None)
+        case e                     => Left(Failure(s"Failed to get s3://${config.aws.bucketName}/$key: ${e.getMessage}"))
+      }
 
-  private val client = S3Client.builder().region(config.awsConfig.region).build()
-
-  private def put(folder: String)(fileName: String, content: String): Either[Failure, PathAndContent] = {
-    val key = s"$folder/$fileName"
-    val fullPath = s"${config.awsConfig.bucketName}/$key"
+  private def put(key: String, content: String): Either[Failure, PathAndContent] = {
+    val fullPath = s"s3://${config.aws.bucketName}/$key"
     Try(
       client.putObject(
         PutObjectRequest
           .builder()
-          .bucket(config.awsConfig.bucketName)
+          .bucket(config.aws.bucketName)
           .key(key)
           .contentType("application/json")
           .build(),
         RequestBody.fromString(content)
       )
     ).toEither.left
-      .map(e => Failure(s"Failed to write to '$fullPath': ${e.getMessage}"))
+      .map(e => Failure(s"Failed to put $fullPath: ${e.getMessage}"))
       .map(_ => PathAndContent(fullPath, content))
   }
 
-  val putArticle: PathAndContent => Either[Failure, PathAndContent] = { article =>
-    put(config.awsConfig.articlesFolder)(article.path, article.content)
-  }
+  def putArticle(article: PathAndContent): Either[Failure, PathAndContent] =
+    put(s"${config.aws.articlesFolder}/${article.path}.json", article.content)
 
-  val putTopic: PathAndContent => Either[Failure, PathAndContent] = { topic =>
-    put(config.awsConfig.topicsFolder)(topic.path, topic.content)
-  }
+  def putTopic(topic: PathAndContent): Either[Failure, PathAndContent] =
+    put(s"${config.aws.topicsFolder}/${topic.path}.json", topic.content)
+
+  def fetchMoreTopics(): Either[Failure, Option[String]] =
+    get(s"${config.aws.topicsFolder}/${config.topic.moreTopics.path}.json")
 }

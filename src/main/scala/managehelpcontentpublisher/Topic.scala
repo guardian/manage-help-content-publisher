@@ -6,7 +6,7 @@ import upickle.default._
 case class Topic(path: String, title: String, articles: Seq[TopicArticle])
 
 object Topic {
-  implicit val writer: Writer[Topic] = macroW
+  implicit val rw: ReadWriter[Topic] = macroRW
 
   def fromInput(input: InputModel): Seq[Topic] = {
     val titles = input.article.dataCategories.map(cat => cat.name -> cat.label).toMap
@@ -24,7 +24,7 @@ case class TopicArticle(path: String, title: String)
 
 object TopicArticle {
 
-  implicit val writer: Writer[TopicArticle] = macroW
+  implicit val rw: ReadWriter[TopicArticle] = macroRW
 
   def fromInput(input: InputArticle): TopicArticle = TopicArticle(
     title = input.title,

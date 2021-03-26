@@ -31,10 +31,10 @@ object Handler {
       case Left(e) => println(s"Failed: ${e.reason}")
       case Right(published) =>
         println(s"Success!")
-        published.foreach(item => println(s"Wrote to '${item.path}': ${item.content}"))
+        published.foreach(item => println(s"Wrote to ${item.path}: ${item.content}"))
     }
   }
 
   private def publishContents(jsonString: String): Either[Failure, Seq[PathAndContent]] =
-    PathAndContent.publishContents(S3.putArticle, S3.putTopic)(jsonString)
+    PathAndContent.publishContents(S3.putArticle, S3.putTopic, S3.fetchMoreTopics())(jsonString)
 }

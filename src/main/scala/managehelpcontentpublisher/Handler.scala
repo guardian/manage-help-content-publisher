@@ -36,5 +36,5 @@ object Handler {
   }
 
   private def publishContents(jsonString: String): Either[Failure, Seq[PathAndContent]] =
-    PathAndContent.publishContents(S3.putArticle, S3.putTopic, S3.fetchMoreTopics())(jsonString)
+    PathAndContent.publishContents(S3.fetchArticleByPath, S3.fetchTopicByPath, S3.putArticle, S3.putTopic)(jsonString)
 }

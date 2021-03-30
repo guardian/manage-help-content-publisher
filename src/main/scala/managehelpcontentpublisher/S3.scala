@@ -31,6 +31,12 @@ object S3 {
         case e                     => Left(Failure(s"Failed to get s3://${config.aws.bucketName}/$key: ${e.getMessage}"))
       }
 
+  def fetchArticleByPath(path: String): Either[Failure, Option[String]] =
+    get(s"${config.aws.articlesFolder}/$path.json")
+
+  def fetchTopicByPath(path: String): Either[Failure, Option[String]] =
+    get(s"${config.aws.topicsFolder}/$path.json")
+
   private def put(key: String, content: String): Either[Failure, PathAndContent] = {
     val fullPath = s"s3://${config.aws.bucketName}/$key"
     Try(
@@ -53,7 +59,4 @@ object S3 {
 
   def putTopic(topic: PathAndContent): Either[Failure, PathAndContent] =
     put(s"${config.aws.topicsFolder}/${topic.path}.json", topic.content)
-
-  def fetchMoreTopics(): Either[Failure, Option[String]] =
-    get(s"${config.aws.topicsFolder}/${config.topic.moreTopics.path}.json")
 }

@@ -18,6 +18,9 @@ object Topic {
       )
     )
   }
+
+  def removeFromTopic(article: Article)(topic: Topic): Topic =
+    topic.copy(articles = topic.articles.filterNot(_.path == article.path))
 }
 
 case class TopicArticle(path: String, title: String)

@@ -32,5 +32,5 @@ object ArticleTopic {
     * If there is no previous version, gives an empty list.
     */
   def topicsArticleRemovedFrom(curr: Article, prev: Option[Article]): Seq[ArticleTopic] =
-    prev.map(_.topics.filterNot(curr.topics.contains)).getOrElse(Nil)
+    prev.map(_.topics.diff(curr.topics)).getOrElse(Nil)
 }

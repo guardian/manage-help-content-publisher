@@ -76,7 +76,10 @@ object PathAndContent {
     def publishTopics(topics: Seq[Topic]): Either[Failure, Seq[PathAndContent]] =
       seqToEither(topics.map(publishTopic))
 
-    def publishMoreTopics(articleTopics: Seq[Topic]): Either[Failure, Option[PathAndContent]] = {
+    def publishMoreTopics(
+        oldArticle: Option[Article],
+        newTopics: Seq[Topic]
+    ): Either[Failure, Option[PathAndContent]] = {
 
       def readMoreTopics(jsonString: String): Either[Failure, MoreTopics] =
         Try(read[MoreTopics](jsonString)).toEither.left.map(e =>
@@ -91,12 +94,16 @@ object PathAndContent {
         content <- newContent
       } yield storeTopic(PathAndContent(moreTopics.path, content))
 
-      if (articleTopics.forall(topic => config.topic.corePaths.contains(topic.path))) Right(None)
+      // No need to do anything if the new topics and the topics of the old article are all core topics
+      if (
+        newTopics.forall(topic => config.topic.corePaths.contains(topic.path)) &&
+        oldArticle.forall(_.topics.forall(topic => config.topic.corePaths.contains(topic.path)))
+      ) Right(None)
       else
         for {
           jsonString <- fetchTopicByPath(config.topic.moreTopics.path)
           oldMoreTopics <- optionToEither(jsonString.map(readMoreTopics))
-          newMoreTopics = MoreTopics.withNewTopics(oldMoreTopics, articleTopics)
+          newMoreTopics = MoreTopics.withNewTopics(oldMoreTopics, oldArticle, newTopics)
           content <- optionToEither(newMoreTopics.map(writeMoreTopics))
           result <- optionToEither(storeMoreTopics(newMoreTopics, content))
         } yield result
@@ -110,7 +117,7 @@ object PathAndContent {
       publishedArticle <- publishArticle(newArticle)
       topics = Topic.fromInput(input)
       publishedTopics <- publishTopics(topics)
-      publishedMoreTopics <- publishMoreTopics(topics)
+      publishedMoreTopics <- publishMoreTopics(oldArticle, topics)
       topicsArticleRemovedFrom <- removeFromTopics(
         newArticle,
         ArticleTopic.topicsArticleRemovedFrom(newArticle, oldArticle)

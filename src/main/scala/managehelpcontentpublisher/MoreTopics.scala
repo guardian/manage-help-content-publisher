@@ -21,14 +21,22 @@ object MoreTopics {
     * Core topics are not included in MoreTopics.
     *
     * @param oldMoreTopics Base for the new MoreTopics if there is a pre-existing instance.
+    * @param articleToRemove An article to remove from all topic lists before adding new topics.
     * @param newTopics New topic lists to add to the base list, replacing any lists with the same paths.
     * @return New instance combining the old instance and the new lists.
     */
-  def withNewTopics(oldMoreTopics: Option[MoreTopics], newTopics: Seq[Topic]): Option[MoreTopics] = {
+  def withNewTopics(
+      oldMoreTopics: Option[MoreTopics],
+      articleToRemove: Option[Article],
+      newTopics: Seq[Topic]
+  ): Option[MoreTopics] = {
+    def removeArticle(topic: Topic): Topic = articleToRemove.fold(topic) { article =>
+      topic.copy(articles = topic.articles.filterNot(_.path == article.path))
+    }
     def toMap(topics: Seq[Topic]) = topics.map(topic => topic.path -> topic).toMap
     val topics = oldMoreTopics
       .fold(newTopics) { moreTopics =>
-        val combinedTopics = toMap(moreTopics.topics) ++ toMap(newTopics)
+        val combinedTopics = toMap(moreTopics.topics.map(removeArticle)) ++ toMap(newTopics)
         combinedTopics.values.toSeq
       }
       .filterNot(topic => config.topic.corePaths.contains(topic.path))

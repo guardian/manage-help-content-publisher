@@ -14,8 +14,11 @@ object Logging {
 
   def logError(context: Context, message: String): Unit = log(context, "ERROR", Obj("message" -> message))
 
-  def logRequest(context: Context, request: APIGatewayProxyRequestEvent): Unit =
-    logInfo(context, "Request", Obj("body" -> request.getBody))
+  def logPublishingRequest(context: Context, request: APIGatewayProxyRequestEvent): Unit =
+    logInfo(context, "Publish request", Obj("body" -> request.getBody))
+
+  def logTakingDownRequest(context: Context, request: APIGatewayProxyRequestEvent): Unit =
+    logInfo(context, "Takedown request", Obj("body" -> request.getBody))
 
   def logResponse(context: Context, response: APIGatewayProxyResponseEvent): Unit = {
     logInfo(

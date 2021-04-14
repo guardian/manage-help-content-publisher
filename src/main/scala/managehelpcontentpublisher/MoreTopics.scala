@@ -3,6 +3,8 @@ package managehelpcontentpublisher
 import managehelpcontentpublisher.Config.config
 import upickle.default._
 
+import scala.util.Try
+
 /** A compilation of published articles by topic in the non-core topics.
   */
 case class MoreTopics(path: String, title: String, topics: Seq[Topic])
@@ -43,4 +45,12 @@ object MoreTopics {
       .sortBy(_.title)
     if (topics.isEmpty) None else Some(MoreTopics(topics))
   }
+
+  def readMoreTopics(jsonString: String): Either[Failure, MoreTopics] =
+    Try(read[MoreTopics](jsonString)).toEither.left.map(e =>
+      Failure(s"Failed to read more topics from '$jsonString': ${e.getMessage}")
+    )
+
+  def writeMoreTopics(moreTopics: MoreTopics): Either[Failure, String] =
+    Try(write(moreTopics)).toEither.left.map(e => Failure(s"Failed to write $moreTopics: ${e.getMessage}"))
 }

@@ -39,10 +39,9 @@ Resources:
                 - s3:ListBucket
                 - s3:GetObject
                 - s3:PutObject
-                - s3:DeleteObject
               Resource:
                 - !Sub arn:aws:s3:::manage-help-content/${Stage}/*
-      Handler: managehelpcontentpublisher.Handler::handleRequest
+      Handler: managehelpcontentpublisher.PublishingHandler::handleRequest
       Runtime: java11
       CodeUri:
         Bucket: membership-dist
@@ -61,9 +60,48 @@ Resources:
             RestApiId:
               Ref: ApiGateway
 
+  TakingDownLambda:
+    Type: AWS::Serverless::Function
+    DependsOn: LogGroup
+    Properties:
+      FunctionName: !Sub ${AppName}-takedown-${Stage}
+      Description: >
+        Codebase: https://github.com/guardian/manage-help-content-publisher.
+      Policies:
+        - Statement:
+            - Sid: S3BucketPolicy
+              Effect: Allow
+              Action:
+                - s3:ListBucket
+                - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
+              Resource:
+                - !Sub arn:aws:s3:::manage-help-content/${Stage}/*
+      Handler: managehelpcontentpublisher.TakingDownHandler::handleRequest
+      Runtime: java11
+      CodeUri:
+        Bucket: membership-dist
+        Key: !Sub membership/${Stage}/${AppName}/${AppName}.jar
+      Environment:
+        Variables:
+          stage: !Ref Stage
+      Timeout: 30
+      MemorySize: 2048
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: DELETE
+            RestApiId:
+              Ref: ApiGateway
+
   ApiGateway:
     Type: AWS::Serverless::Api
-    DependsOn: Lambda
+    DependsOn:
+      - Lambda
+      - TakingDownLambda
     Properties:
       Name: !Sub ${AppName}-${Stage}-api-gateway
       StageName: !Sub ${Stage}

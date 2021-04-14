@@ -76,6 +76,35 @@ object MoreTopicsTest extends TestSuite {
             )
           )
       }
+
+      test("Pre-existing more topics and an article to remove") {
+        val topic1 = Topic(path = "p1", title = "t1", articles = Seq(TopicArticle(path = "a1p", title = "a1t")))
+        MoreTopics.withNewTopics(
+          oldMoreTopics = Some(
+            MoreTopics(
+              path = config.topic.moreTopics.path,
+              title = config.topic.moreTopics.title,
+              topics = Seq(topic1)
+            )
+          ),
+          newTopics = Nil,
+          articleToRemove = Some(
+            Article(
+              title = "a1t",
+              body = ujson.Null,
+              path = "a1p",
+              topics = Seq(ArticleTopic(path = "p1", title = "t1"))
+            )
+          )
+        ) ==>
+          Some(
+            MoreTopics(
+              path = config.topic.moreTopics.path,
+              title = config.topic.moreTopics.title,
+              topics = Seq(topic1.copy(articles = Nil))
+            )
+          )
+      }
     }
   }
 }

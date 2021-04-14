@@ -7,10 +7,10 @@ import java.io.File
 import scala.io.Source
 import Logging._
 
-object Handler {
+object PublishingHandler {
 
   def handleRequest(request: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
-    logRequest(context, request)
+    logPublishingRequest(context, request)
     val response = publishContents(request.getBody) match {
       case Left(e) =>
         logError(context, e.reason)

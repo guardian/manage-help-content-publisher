@@ -2,10 +2,15 @@ package managehelpcontentpublisher
 
 import upickle.default._
 
+import scala.util.Try
+
 case class InputModel(article: InputArticle, dataCategories: Seq[DataCategory])
 
 object InputModel {
   implicit val reader: Reader[InputModel] = macroR
+
+  def readInput(jsonString: String): Either[Failure, InputModel] =
+    Try(read[InputModel](jsonString)).toEither.left.map(e => Failure(s"Failed to read input: ${e.getMessage}"))
 }
 
 case class InputArticle(

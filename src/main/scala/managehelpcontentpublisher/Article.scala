@@ -3,6 +3,8 @@ package managehelpcontentpublisher
 import managehelpcontentpublisher.SalesforceCleaner.cleanCustomFieldName
 import upickle.default._
 
+import scala.util.Try
+
 case class Article(title: String, body: ujson.Value, path: String, topics: Seq[ArticleTopic])
 
 object Article {
@@ -15,6 +17,12 @@ object Article {
     path = input.urlName,
     topics = input.dataCategories.map(ArticleTopic.fromSalesforceDataCategory)
   )
+
+  def readArticle(jsonString: String): Either[Failure, Article] =
+    Try(read[Article](jsonString)).toEither.left.map(e => Failure(s"Failed to read article: ${e.getMessage}"))
+
+  def writeArticle(article: Article): Either[Failure, String] =
+    Try(write(article)).toEither.left.map(e => Failure(s"Failed to write article: ${e.getMessage}"))
 }
 
 case class ArticleTopic(path: String, title: String)

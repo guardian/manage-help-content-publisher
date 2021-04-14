@@ -95,9 +95,10 @@ object PathAndContent {
       } yield storeTopic(PathAndContent(moreTopics.path, content))
 
       // No need to do anything if the new topics and the topics of the old article are all core topics
+      def isCore(path: String) = config.topic.corePaths.contains(path)
       if (
-        newTopics.forall(topic => config.topic.corePaths.contains(topic.path)) &&
-        oldArticle.forall(_.topics.forall(topic => config.topic.corePaths.contains(topic.path)))
+        newTopics.forall(topic => isCore(topic.path)) &&
+        oldArticle.forall(_.topics.forall(topic => isCore(topic.path)))
       ) Right(None)
       else
         for {

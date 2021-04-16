@@ -33,10 +33,17 @@ Resources:
         Codebase: https://github.com/guardian/manage-help-content-publisher.
       Policies:
         - Statement:
-            - Sid: S3BucketPolicy
+            - Sid: S3BucketListPolicy
               Effect: Allow
               Action:
                 - s3:ListBucket
+              Resource:
+                # It shouldn't be necessary to have a separate list policy but there seems to be a bug in the S3 service somewhere
+                - arn:aws:s3:::manage-help-content*
+        - Statement:
+            - Sid: S3BucketPolicy
+              Effect: Allow
+              Action:
                 - s3:GetObject
                 - s3:PutObject
               Resource:
@@ -75,10 +82,17 @@ Resources:
         Codebase: https://github.com/guardian/manage-help-content-publisher.
       Policies:
         - Statement:
-            - Sid: S3BucketPolicy
+            - Sid: S3BucketListPolicy
               Effect: Allow
               Action:
                 - s3:ListBucket
+              Resource:
+                # It shouldn't be necessary to have a separate list policy but there seems to be a bug in the S3 service somewhere
+                - arn:aws:s3:::manage-help-content*
+        - Statement:
+            - Sid: S3BucketPolicy
+              Effect: Allow
+              Action:
                 - s3:GetObject
                 - s3:PutObject
                 - s3:DeleteObject

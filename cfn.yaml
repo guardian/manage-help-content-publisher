@@ -60,9 +60,15 @@ Resources:
             RestApiId:
               Ref: ApiGateway
 
+  TakingDownLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AppName}-takedown-${Stage}
+      RetentionInDays: 90
+
   TakingDownLambda:
     Type: AWS::Serverless::Function
-    DependsOn: LogGroup
+    DependsOn: TakingDownLogGroup
     Properties:
       FunctionName: !Sub ${AppName}-takedown-${Stage}
       Description: >

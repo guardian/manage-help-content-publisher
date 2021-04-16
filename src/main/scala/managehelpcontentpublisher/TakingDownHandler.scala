@@ -10,7 +10,7 @@ import scala.io.Source
 object TakingDownHandler {
 
   def handleRequest(request: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
-    logTakingDownRequest(context, request)
+    logRequest(context, request)
     val response = takeDownArticle(request.getBody) match {
       case Left(e) =>
         logError(context, e.reason)

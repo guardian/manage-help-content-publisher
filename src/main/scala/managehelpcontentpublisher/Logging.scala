@@ -2,7 +2,7 @@ package managehelpcontentpublisher
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
-import ujson.Obj
+import ujson.{Obj, Str}
 
 object Logging {
 
@@ -14,11 +14,8 @@ object Logging {
 
   def logError(context: Context, message: String): Unit = log(context, "ERROR", Obj("message" -> message))
 
-  def logPublishingRequest(context: Context, request: APIGatewayProxyRequestEvent): Unit =
-    logInfo(context, "Publish request", Obj("body" -> request.getBody))
-
-  def logTakingDownRequest(context: Context, request: APIGatewayProxyRequestEvent): Unit =
-    logInfo(context, "Takedown request", Obj("body" -> request.getBody))
+  def logRequest(context: Context, request: APIGatewayProxyRequestEvent): Unit =
+    logInfo(context, "Request", Obj("body" -> Option(request.getBody).map(body => Str(body)).getOrElse(ujson.Null)))
 
   def logResponse(context: Context, response: APIGatewayProxyResponseEvent): Unit = {
     logInfo(

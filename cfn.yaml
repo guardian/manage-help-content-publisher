@@ -112,7 +112,7 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
-            Path: /
+            Path: /{articlePath}
             Method: DELETE
             RestApiId:
               Ref: ApiGateway

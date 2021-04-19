@@ -209,9 +209,11 @@ object PathAndContentTestSuite extends TestSuite {
     ) _
 
   private def takeDownArticle(
+      articles: Map[String, String] = Map(Fixtures.article1, Fixtures.article2),
       topics: Map[String, String] = Map(Fixtures.deliveryTopic, Fixtures.appsTopic, Fixtures.moreTopics)
   ) =
     PathAndContent.takeDownArticle(
+      fetchArticleByPath = { path => Right(articles.get(path)) },
       deleteArticleByPath = { path => Right(s"testArticles/$path") },
       fetchTopicByPath = { path => Right(topics.get(path)) },
       storeTopic = { topic => Right(PathAndContent(s"testTopics/${topic.path}", topic.content)) }
@@ -512,48 +514,7 @@ object PathAndContentTestSuite extends TestSuite {
     }
 
     test("takeDownArticle") {
-      val takeDown = takeDownArticle()("""{
-                                         |    "dataCategories": [
-                                         |        {
-                                         |            "publishedArticles": [
-                                         |                {
-                                         |                    "urlName": "id-like-to-make-a-complaint-about-an-advertisement",
-                                         |                    "title": "I'd like to make a complaint about an advertisement",
-                                         |                    "id": "id1",
-                                         |                    "dataCategories": [],
-                                         |                    "body": null
-                                         |                },
-                                         |                {
-                                         |                    "urlName": "can-i-read-your-papermagazines-online",
-                                         |                    "title": "Can I read your paper/magazines online?",
-                                         |                    "id": "id2",
-                                         |                    "dataCategories": [],
-                                         |                    "body": null
-                                         |                },
-                                         |                {
-                                         |                    "urlName": "im-unable-to-comment-and-need-help",
-                                         |                    "title": "I'm unable to comment and need help",
-                                         |                    "id": "id3",
-                                         |                    "dataCategories": [],
-                                         |                    "body": null
-                                         |                }
-                                         |            ],
-                                         |            "name": "apps__c"
-                                         |        }
-                                         |    ],
-                                         |    "article": {
-                                         |        "urlName": "can-i-read-your-papermagazines-online",
-                                         |        "title": "Can I read your paper/magazines online?",
-                                         |        "id": "id2",
-                                         |        "dataCategories": [
-                                         |            {
-                                         |                "name": "apps__c",
-                                         |                "label": "The Guardian apps"
-                                         |            }
-                                         |        ],
-                                         |        "body": "<p>We do not</p>"
-                                         |    }
-                                         |}""".stripMargin)
+      val takeDown = takeDownArticle()("can-i-read-your-papermagazines-online")
       test("Number of files modified") {
         takeDown.map(_.length) ==> Right(3)
       }

@@ -22,10 +22,10 @@ object Topic {
   }
 
   def readTopic(jsonString: String): Either[Failure, Topic] =
-    Try(read[Topic](jsonString)).toEither.left.map(e => Failure(s"Failed to read topic: ${e.getMessage}"))
+    Try(read[Topic](jsonString)).toEither.left.map(e => ResponseFailure(s"Failed to read topic: ${e.getMessage}"))
 
   def writeTopic(topic: Topic): Either[Failure, String] =
-    Try(write(topic)).toEither.left.map(e => Failure(s"Failed to write topic: ${e.getMessage}"))
+    Try(write(topic)).toEither.left.map(e => ResponseFailure(s"Failed to write topic: ${e.getMessage}"))
 
   def removeFromTopic(article: Article)(topic: Topic): Topic =
     topic.copy(articles = topic.articles.filterNot(_.path == article.path))

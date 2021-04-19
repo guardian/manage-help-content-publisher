@@ -33,7 +33,7 @@ object S3 {
       .left
       .flatMap {
         case _: NoSuchKeyException => Right(None)
-        case e                     => Left(Failure(s"Failed to get s3://${config.aws.bucketName}/$key: ${e.getMessage}"))
+        case e                     => Left(ResponseFailure(s"Failed to get s3://${config.aws.bucketName}/$key: ${e.getMessage}"))
       }
 
   def fetchArticleByPath(path: String): Either[Failure, Option[String]] =
@@ -55,7 +55,7 @@ object S3 {
         RequestBody.fromString(content)
       )
     ).toEither.left
-      .map(e => Failure(s"Failed to put $fullPath: ${e.getMessage}"))
+      .map(e => ResponseFailure(s"Failed to put $fullPath: ${e.getMessage}"))
       .map(_ => PathAndContent(fullPath, content))
   }
 
@@ -76,7 +76,7 @@ object S3 {
           .build()
       )
     ).toEither.left
-      .map(e => Failure(s"Failed to delete $fullPath: ${e.getMessage}"))
+      .map(e => ResponseFailure(s"Failed to delete $fullPath: ${e.getMessage}"))
       .map(_ => fullPath)
   }
 

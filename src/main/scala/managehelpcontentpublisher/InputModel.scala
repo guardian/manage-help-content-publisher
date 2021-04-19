@@ -10,7 +10,7 @@ object InputModel {
   implicit val reader: Reader[InputModel] = macroR
 
   def readInput(jsonString: String): Either[Failure, InputModel] =
-    Try(read[InputModel](jsonString)).toEither.left.map(e => Failure(s"Failed to read input: ${e.getMessage}"))
+    Try(read[InputModel](jsonString)).toEither.left.map(e => RequestFailure(s"Failed to read input: ${e.getMessage}"))
 }
 
 case class InputArticle(

@@ -19,10 +19,10 @@ object Article {
   )
 
   def readArticle(jsonString: String): Either[Failure, Article] =
-    Try(read[Article](jsonString)).toEither.left.map(e => Failure(s"Failed to read article: ${e.getMessage}"))
+    Try(read[Article](jsonString)).toEither.left.map(e => ResponseFailure(s"Failed to read article: ${e.getMessage}"))
 
   def writeArticle(article: Article): Either[Failure, String] =
-    Try(write(article)).toEither.left.map(e => Failure(s"Failed to write article: ${e.getMessage}"))
+    Try(write(article)).toEither.left.map(e => ResponseFailure(s"Failed to write article: ${e.getMessage}"))
 }
 
 case class ArticleTopic(path: String, title: String)

@@ -1,6 +1,6 @@
 package managehelpcontentpublisher
 
-import managehelpcontentpublisher.Article.{fromInput, readArticle, writeArticle}
+import managehelpcontentpublisher.Article.{readArticle, writeArticle}
 import managehelpcontentpublisher.Config.config
 import managehelpcontentpublisher.Eithers._
 import managehelpcontentpublisher.InputModel.readInput
@@ -106,27 +106,31 @@ object PathAndContent {
     } yield Seq(publishedArticle) ++ publishedTopics ++ publishedMoreTopics.toSeq ++ topicsArticleRemovedFrom
   }
 
-  /** Takes down the Article with the given Json representation
+  /** Takes down the Article with the given path
     * and removes it from any published Topics and MoreTopics it belonged to.
     *
+    * @param fetchArticleByPath Function that fetches the current state of the published article with the given path
+    *                        or None if there is no such article.
     * @param deleteArticleByPath Function that will delete the published representation of an Article.
     * @param fetchTopicByPath Function that fetches the current state of the published topic with the given path
     *                        or None if there is no such topic.
     * @param storeTopic Function that will store the new representation of a Topic somewhere.
-    * @param jsonString A Json string holding all the data needed to publish an Article and its Topics.
+    * @param path Path to published representation of the article.
     * @return List of PathAndContents modified.<br />
     *         The meaning of Path depends on the implementation of deleteArticleByPath and storeTopic.
     */
   def takeDownArticle(
+      fetchArticleByPath: String => Either[Failure, Option[String]],
       deleteArticleByPath: String => Either[Failure, String],
       fetchTopicByPath: String => Either[Failure, Option[String]],
       storeTopic: PathAndContent => Either[Failure, PathAndContent]
-  )(jsonString: String): Either[Failure, Seq[PathAndContent]] =
+  )(path: String): Either[Failure, Seq[PathAndContent]] =
     for {
-      input <- readInput(jsonString)
-      article = fromInput(input.article)
+      optArticleJson <- fetchArticleByPath(path)
+      articleJson <- optArticleJson.toRight(NotFoundFailure)
+      article <- readArticle(articleJson)
       topicsArticleRemovedFrom <- removeFromTopics(fetchTopicByPath, storeTopic)(article, article.topics)
       moreTopicsWithoutArticle <- publishMoreTopics(fetchTopicByPath, storeTopic)(Some(article), Nil)
-      deletedPath <- deleteArticleByPath(article.path)
+      deletedPath <- deleteArticleByPath(path)
     } yield topicsArticleRemovedFrom ++ moreTopicsWithoutArticle.toSeq :+ PathAndContent(deletedPath, "")
 }

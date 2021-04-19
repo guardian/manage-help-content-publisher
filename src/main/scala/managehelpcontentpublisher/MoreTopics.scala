@@ -48,9 +48,9 @@ object MoreTopics {
 
   def readMoreTopics(jsonString: String): Either[Failure, MoreTopics] =
     Try(read[MoreTopics](jsonString)).toEither.left.map(e =>
-      Failure(s"Failed to read more topics from '$jsonString': ${e.getMessage}")
+      ResponseFailure(s"Failed to read more topics from '$jsonString': ${e.getMessage}")
     )
 
   def writeMoreTopics(moreTopics: MoreTopics): Either[Failure, String] =
-    Try(write(moreTopics)).toEither.left.map(e => Failure(s"Failed to write $moreTopics: ${e.getMessage}"))
+    Try(write(moreTopics)).toEither.left.map(e => ResponseFailure(s"Failed to write $moreTopics: ${e.getMessage}"))
 }

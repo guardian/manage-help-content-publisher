@@ -29,7 +29,7 @@ object Handler {
         new APIGatewayProxyResponseEvent().withStatusCode(400).withBody(reason)
       case Left(NotFoundFailure) =>
         logError(context, NotFoundFailure.reason)
-        new APIGatewayProxyResponseEvent().withStatusCode(404).withBody(NotFoundFailure.reason)
+        new APIGatewayProxyResponseEvent().withStatusCode(404)
       case Left(ResponseFailure(reason)) =>
         logError(context, reason)
         new APIGatewayProxyResponseEvent().withStatusCode(500).withBody(reason)

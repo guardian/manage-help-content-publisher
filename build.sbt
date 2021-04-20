@@ -41,11 +41,11 @@ lazy val legacyContentImport = (project in file("legacy-content-import"))
 
 testFrameworks += new TestFramework("utest.runner.Framework")
 
-assemblyMergeStrategy in assembly := {
+assembly / assemblyMergeStrategy := {
   case "module-info.class"                                      => MergeStrategy.discard
   case PathList("META-INF", "versions", _, "module-info.class") => MergeStrategy.discard
   case PathList("META-INF", "io.netty.versions.properties")     => MergeStrategy.discard
   case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    val oldStrategy = (assembly / assemblyMergeStrategy).value
     oldStrategy(x)
 }

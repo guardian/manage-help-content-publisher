@@ -1,9 +1,20 @@
 import Dependencies._
+import com.gu.riffraff.artifact.BuildInfo
 
 ThisBuild / scalaVersion := "2.13.5"
 
+val buildInfo = Seq(
+  buildInfoPackage := "build",
+  buildInfoKeys ++= {
+    val buildInfo = BuildInfo(baseDirectory.value)
+    Seq[BuildInfoKey](
+      "buildNumber" -> buildInfo.buildIdentifier
+    )
+  }
+)
+
 lazy val root = (project in file("."))
-  .enablePlugins(RiffRaffArtifact)
+  .enablePlugins(BuildInfoPlugin, RiffRaffArtifact)
   .settings(
     name := "manage-help-content-publisher",
     assemblyJarName := s"${name.value}.jar",
@@ -12,6 +23,7 @@ lazy val root = (project in file("."))
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
     riffRaffManifestProjectName := s"${name.value}",
     riffRaffArtifactResources += (file("cfn.yaml"), "cfn/cfn.yaml"),
+    buildInfo,
     libraryDependencies ++= Seq(
       http,
       circeCore,

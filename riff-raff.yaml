@@ -17,16 +17,6 @@ deployments:
       fileName: manage-help-content-publisher.jar
       functionNames:
         - manage-help-content-publisher-
-      prefixStack: false
-    dependencies:
-      - cfn
-
-  manage-help-content-takedowner:
-    type: aws-lambda
-    parameters:
-      bucket: membership-dist
-      fileName: manage-help-content-publisher.jar
-      functionNames:
         - manage-help-content-publisher-takedown-
       prefixStack: false
     dependencies:

@@ -15,7 +15,7 @@ object PathAndContent {
       fetchTopicByPath: String => Either[Failure, Option[String]],
       storeTopic: PathAndContent => Either[Failure, PathAndContent]
   )(article: Article, topics: Seq[ArticleTopic]): Either[Failure, Seq[PathAndContent]] =
-    seqToEither(topics.map(removeFromTopic(fetchTopicByPath, storeTopic)(article))).map(_.flatten)
+    topics.map(removeFromTopic(fetchTopicByPath, storeTopic)(article)).sequence.map(_.flatten)
 
   private def removeFromTopic(
       fetchTopicByPath: String => Either[Failure, Option[String]],
@@ -23,9 +23,9 @@ object PathAndContent {
   )(article: Article)(articleTopic: ArticleTopic): Either[Failure, Option[PathAndContent]] =
     for {
       oldTopicJson <- fetchTopicByPath(articleTopic.path)
-      oldTopic <- optionToEither(oldTopicJson.map(readTopic))
-      newTopicJson <- optionToEither(oldTopic.map(Topic.removeFromTopic(article)).map(writeTopic))
-      newTopic <- optionToEither(newTopicJson.map(content => storeTopic(PathAndContent(articleTopic.path, content))))
+      oldTopic <- oldTopicJson.map(readTopic).sequence
+      newTopicJson <- oldTopic.map(Topic.removeFromTopic(article)).map(writeTopic).sequence
+      newTopic <- newTopicJson.map(content => storeTopic(PathAndContent(articleTopic.path, content))).sequence
     } yield newTopic
 
   private def publishMoreTopics(
@@ -47,10 +47,10 @@ object PathAndContent {
     else
       for {
         jsonString <- fetchTopicByPath(config.topic.moreTopics.path)
-        oldMoreTopics <- optionToEither(jsonString.map(readMoreTopics))
+        oldMoreTopics <- jsonString.map(readMoreTopics).sequence
         newMoreTopics = MoreTopics.withNewTopics(oldMoreTopics, oldArticle, newTopics)
-        content <- optionToEither(newMoreTopics.map(writeMoreTopics))
-        result <- optionToEither(storeMoreTopics(newMoreTopics, content))
+        content <- newMoreTopics.map(writeMoreTopics).sequence
+        result <- storeMoreTopics(newMoreTopics, content).sequence
       } yield result
   }
 
@@ -88,13 +88,13 @@ object PathAndContent {
       } yield result
 
     def publishTopics(topics: Seq[Topic]): Either[Failure, Seq[PathAndContent]] =
-      seqToEither(topics.map(publishTopic))
+      topics.map(publishTopic).sequence
 
     for {
       input <- readInput(jsonString)
       newArticle = Article.fromInput(input.article)
       oldArticleJson <- fetchArticleByPath(newArticle.path)
-      oldArticle <- optionToEither(oldArticleJson.map(readArticle))
+      oldArticle <- oldArticleJson.map(readArticle).sequence
       publishedArticle <- publishArticle(newArticle)
       topics = Topic.fromInput(input)
       publishedTopics <- publishTopics(topics)

@@ -54,7 +54,8 @@ object S3 {
           .build(),
         RequestBody.fromString(content)
       )
-    ).toEither.left
+    ).toEither
+      .left
       .map(e => ResponseFailure(s"Failed to put $fullPath: ${e.getMessage}"))
       .map(_ => PathAndContent(fullPath, content))
   }
@@ -75,8 +76,8 @@ object S3 {
           .key(key)
           .build()
       )
-    ).toEither.left
-      .map(e => ResponseFailure(s"Failed to delete $fullPath: ${e.getMessage}"))
+    ).toEither
+      .left.map(e => ResponseFailure(s"Failed to delete $fullPath: ${e.getMessage}"))
       .map(_ => fullPath)
   }
 

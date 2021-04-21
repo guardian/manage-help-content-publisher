@@ -6,15 +6,14 @@ import managehelpcontentpublisher.Handler.buildResponse
 import managehelpcontentpublisher.Logging._
 
 import java.io.File
+import scala.util.chaining.scalaUtilChainingOps
 
 object TakingDownHandler {
 
-  def handleRequest(request: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
+  def handleRequest(request: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent =
     logRequest(context, request)
-    val response = buildResponse(context, takeDownArticle(request.getPathParameters.get("articlePath")))
-    logResponse(context, response)
-    response
-  }
+      .pipe(_ => buildResponse(context, takeDownArticle(request.getPathParameters.get("articlePath"))))
+      .tap(logResponse(context, _))
 
   def main(args: Array[String]): Unit =
     Handler.main(takeDownArticle, new File(args(0)))

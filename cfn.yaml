@@ -48,6 +48,12 @@ Resources:
                 - s3:PutObject
               Resource:
                 - !Sub arn:aws:s3:::manage-help-content/${Stage}/*
+        - Statement:
+            - Sid: s3Deploy
+              Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - arn:aws:s3::*:membership-dist/*
       Handler: managehelpcontentpublisher.PublishingHandler::handleRequest
       Runtime: java11
       CodeUri:
@@ -98,6 +104,12 @@ Resources:
                 - s3:DeleteObject
               Resource:
                 - !Sub arn:aws:s3:::manage-help-content/${Stage}/*
+        - Statement:
+            - Sid: s3Deploy
+              Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - arn:aws:s3::*:membership-dist/*
       Handler: managehelpcontentpublisher.TakingDownHandler::handleRequest
       Runtime: java11
       CodeUri:

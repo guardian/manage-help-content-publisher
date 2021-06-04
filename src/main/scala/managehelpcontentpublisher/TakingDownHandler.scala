@@ -19,7 +19,5 @@ object TakingDownHandler {
     Handler.main(takeDownArticle, new File(args(0)))
 
   private def takeDownArticle(path: String): Either[Failure, Seq[PathAndContent]] =
-    PathAndContent.takeDownArticle(S3.fetchArticleByPath, S3.deleteArticleByPath, S3.fetchTopicByPath, S3.putTopic)(
-      path
-    )
+    PathAndContent.takeDownArticle(S3.publishingOps)(path)
 }

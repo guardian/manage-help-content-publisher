@@ -36,12 +36,6 @@ object S3 {
         case e                     => Left(ResponseFailure(s"Failed to get s3://${config.aws.bucketName}/$key: ${e.getMessage}"))
       }
 
-  def fetchArticleByPath(path: String): Either[Failure, Option[String]] =
-    get(s"${config.aws.articlesFolder}/$path.json")
-
-  def fetchTopicByPath(path: String): Either[Failure, Option[String]] =
-    get(s"${config.aws.topicsFolder}/$path.json")
-
   private def put(key: String, content: String): Either[Failure, PathAndContent] = {
     val fullPath = s"s3://${config.aws.bucketName}/$key"
     Try(
@@ -60,12 +54,6 @@ object S3 {
       .map(_ => PathAndContent(fullPath, content))
   }
 
-  def putArticle(article: PathAndContent): Either[Failure, PathAndContent] =
-    put(s"${config.aws.articlesFolder}/${article.path}.json", article.content)
-
-  def putTopic(topic: PathAndContent): Either[Failure, PathAndContent] =
-    put(s"${config.aws.topicsFolder}/${topic.path}.json", topic.content)
-
   private def delete(key: String): Either[Failure, String] = {
     val fullPath = s"s3://${config.aws.bucketName}/$key"
     Try(
@@ -81,6 +69,21 @@ object S3 {
       .map(_ => fullPath)
   }
 
-  def deleteArticleByPath(path: String): Either[Failure, String] =
-    delete(s"${config.aws.articlesFolder}/$path.json")
+  val publishingOps: PublishingOps = new PublishingOps {
+
+    def fetchArticleByPath(path: String): Either[Failure, Option[String]] =
+      get(s"${config.aws.articlesFolder}/$path.json")
+
+    def fetchTopicByPath(path: String): Either[Failure, Option[String]] =
+      get(s"${config.aws.topicsFolder}/$path.json")
+
+    def storeArticle(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
+      put(s"${config.aws.articlesFolder}/${pathAndContent.path}.json", pathAndContent.content)
+
+    def storeTopic(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
+      put(s"${config.aws.topicsFolder}/${pathAndContent.path}.json", pathAndContent.content)
+
+    def deleteArticleByPath(path: String): Either[Failure, String] =
+      delete(s"${config.aws.articlesFolder}/$path.json")
+  }
 }

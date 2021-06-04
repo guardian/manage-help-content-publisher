@@ -202,10 +202,19 @@ object PathAndContentTestSuite extends TestSuite {
       previousTopics: Map[String, String] = Map()
   ) =
     PathAndContent.publishContents(
-      fetchArticleByPath = { path => Right(previousArticles.get(path)) },
-      fetchTopicByPath = { path => Right(previousTopics.get(path)) },
-      storeArticle = { article => Right(PathAndContent(s"testArticles/${article.path}", article.content)) },
-      storeTopic = { topic => Right(PathAndContent(s"testTopics/${topic.path}", topic.content)) }
+      new PublishingOps {
+        def fetchArticleByPath(path: String): Either[Failure, Option[String]] = Right(previousArticles.get(path))
+
+        def fetchTopicByPath(path: String): Either[Failure, Option[String]] = Right(previousTopics.get(path))
+
+        def storeArticle(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
+          Right(PathAndContent(s"testArticles/${pathAndContent.path}", pathAndContent.content))
+
+        def storeTopic(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
+          Right(PathAndContent(s"testTopics/${pathAndContent.path}", pathAndContent.content))
+
+        def deleteArticleByPath(path: String): Either[Failure, String] = Left(NotFoundFailure)
+      }
     ) _
 
   private def takeDownArticle(
@@ -213,10 +222,19 @@ object PathAndContentTestSuite extends TestSuite {
       topics: Map[String, String] = Map(Fixtures.deliveryTopic, Fixtures.appsTopic, Fixtures.moreTopics)
   ) =
     PathAndContent.takeDownArticle(
-      fetchArticleByPath = { path => Right(articles.get(path)) },
-      deleteArticleByPath = { path => Right(s"testArticles/$path") },
-      fetchTopicByPath = { path => Right(topics.get(path)) },
-      storeTopic = { topic => Right(PathAndContent(s"testTopics/${topic.path}", topic.content)) }
+      new PublishingOps {
+        def fetchArticleByPath(path: String): Either[Failure, Option[String]] = Right(articles.get(path))
+
+        def fetchTopicByPath(path: String): Either[Failure, Option[String]] = Right(topics.get(path))
+
+        def storeArticle(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
+          Left(RequestFailure("unexpected"))
+
+        def storeTopic(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
+          Right(PathAndContent(s"testTopics/${pathAndContent.path}", pathAndContent.content))
+
+        def deleteArticleByPath(path: String): Either[Failure, String] = Right(s"testArticles/$path")
+      }
     ) _
 
   val tests: Tests = Tests {

@@ -3,7 +3,6 @@ package managehelpcontentpublisher
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import managehelpcontentpublisher.Logging.{logError, logPublished}
-import managehelpcontentpublisher.PublishingHandler.publishContents
 
 import java.io.File
 import scala.io.Source

@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.s3.model.{
   PutObjectRequest
 }
 
-import java.nio.charset.StandardCharsets.UTF_8
+import java.net.URI
 import scala.util.Try
 
 object S3 {
@@ -26,8 +26,7 @@ object S3 {
             .bucket(config.aws.bucketName)
             .key(key)
             .build()
-        )
-        .asString(UTF_8)
+        ).asUtf8String()
     ).toEither
       .map(Some(_))
       .left
@@ -77,11 +76,19 @@ object S3 {
     def fetchTopicByPath(path: String): Either[Failure, Option[String]] =
       get(s"${config.aws.topicsFolder}/$path.json")
 
+    def fetchSitemap(): Either[Failure, Set[URI]] = get(config.aws.sitemapFile).flatMap {
+      case None    => Left(ResponseFailure(s"Missing sitemap ${config.aws.sitemapFile}"))
+      case Some(s) => Right(s.split('\n').map(new URI(_)).toSet)
+    }
+
     def storeArticle(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
       put(s"${config.aws.articlesFolder}/${pathAndContent.path}.json", pathAndContent.content)
 
     def storeTopic(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
       put(s"${config.aws.topicsFolder}/${pathAndContent.path}.json", pathAndContent.content)
+
+    def storeSitemap(urls: Set[URI]): Either[Failure, Unit] =
+      put(config.aws.sitemapFile, urls.mkString("\n")).map(_ => ())
 
     def deleteArticleByPath(path: String): Either[Failure, String] =
       delete(s"${config.aws.articlesFolder}/$path.json")

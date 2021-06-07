@@ -1,0 +1,21 @@
+{
+  "title": "Can I read your paper/magazines online?",
+  "body": [
+    {
+      "element": "p",
+      "content": [
+        {
+          "element": "text",
+          "content": "We do not"
+        }
+      ]
+    }
+  ],
+  "path": "can-i-read-your-papermagazines-online",
+  "topics": [
+    {
+      "path": "apps",
+      "title": "The Guardian apps"
+    }
+  ]
+}

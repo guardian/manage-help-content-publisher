@@ -1,0 +1,21 @@
+{
+  "title": "How can I redirect my delivery?",
+  "body": [
+    {
+      "element": "p",
+      "content": [
+        {
+          "element": "text",
+          "content": "Our customer service team will ..."
+        }
+      ]
+    }
+  ],
+  "path": "how-can-i-redirect-my-delivery",
+  "topics": [
+    {
+      "path": "delivery",
+      "title": "Delivery"
+    }
+  ]
+}

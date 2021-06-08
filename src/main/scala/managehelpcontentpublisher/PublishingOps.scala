@@ -1,5 +1,7 @@
 package managehelpcontentpublisher
 
+import java.net.URI
+
 /** Operations to read and write content to and from storage accessible to the web layer.
   */
 trait PublishingOps {
@@ -14,6 +16,8 @@ trait PublishingOps {
     */
   def fetchTopicByPath(path: String): Either[Failure, Option[String]]
 
+  def fetchSitemap(): Either[Failure, Set[URI]]
+
   /** Stores the published representation of an article so that it's available to the web layer.
     */
   def storeArticle(pathAndContent: PathAndContent): Either[Failure, PathAndContent]
@@ -21,6 +25,8 @@ trait PublishingOps {
   /** Stores the published representation of a topic so that it's available to the web layer.
     */
   def storeTopic(pathAndContent: PathAndContent): Either[Failure, PathAndContent]
+
+  def storeSitemap(urls: Set[URI]): Either[Failure, Unit]
 
   /** Deletes the published representation of an article.
     */

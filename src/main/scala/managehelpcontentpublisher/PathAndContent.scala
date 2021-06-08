@@ -7,6 +7,8 @@ import managehelpcontentpublisher.InputModel.readInput
 import managehelpcontentpublisher.MoreTopics.{readMoreTopics, writeMoreTopics}
 import managehelpcontentpublisher.Topic.{readTopic, writeTopic}
 
+import java.net.URI
+
 case class PathAndContent(path: String, content: String)
 
 object PathAndContent {
@@ -78,6 +80,19 @@ object PathAndContent {
     def publishTopics(topics: Seq[Topic]): Either[Failure, Seq[PathAndContent]] =
       topics.map(publishTopic).sequence
 
+    def addToSitemap(article: Article): Either[Failure, Option[PathAndContent]] =
+      publishingOps.fetchSitemap() flatMap { oldSitemap =>
+        val articleUrl = new URI(s"${config.articleUrlPrefix}/${article.path}")
+        if (oldSitemap.contains(articleUrl)) {
+          Right(None)
+        } else {
+          val newSitemap = oldSitemap + articleUrl
+          publishingOps.storeSitemap(newSitemap) map (_ =>
+            Some(PathAndContent(config.aws.sitemapFile, newSitemap.mkString("\n")))
+          )
+        }
+      }
+
     for {
       input <- readInput(jsonString)
       newArticle = Article.fromInput(input.article)
@@ -91,7 +106,10 @@ object PathAndContent {
         newArticle,
         ArticleTopic.topicsArticleRemovedFrom(newArticle, oldArticle)
       )
-    } yield Seq(publishedArticle) ++ publishedTopics ++ publishedMoreTopics.toSeq ++ topicsArticleRemovedFrom
+      updatedSitemap <- addToSitemap(newArticle)
+    } yield Seq(
+      publishedArticle
+    ) ++ publishedTopics ++ publishedMoreTopics.toSeq ++ topicsArticleRemovedFrom ++ updatedSitemap.toSeq
   }
 
   /** Takes down the Article with the given path

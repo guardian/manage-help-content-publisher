@@ -3,6 +3,8 @@ import com.gu.riffraff.artifact.BuildInfo
 
 ThisBuild / scalaVersion := "2.13.6"
 
+ThisBuild / scalacOptions += "-deprecation"
+
 val buildInfo = Seq(
   buildInfoPackage := "build",
   buildInfoKeys ++= {

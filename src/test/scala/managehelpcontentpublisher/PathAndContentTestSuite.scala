@@ -2,6 +2,7 @@ package managehelpcontentpublisher
 
 import utest._
 
+import java.net.URI
 import scala.io.Source
 
 /** See [[https://github.com/guardian/salesforce/blob/master/force-app/main/default/classes/ArticleBodyValidation.cls#L5-L20 list of HTML elements we support in Salesforce]].
@@ -20,6 +21,7 @@ object PathAndContentTestSuite extends TestSuite {
     val deliveryTopic: (String, String) = topic("delivery")
     val appsTopic: (String, String) = topic("apps")
     val moreTopics: (String, String) = topic("more-topics")
+    val sitemap: Set[URI] = Source.fromResource("sitemap.txt").getLines().map(new URI(_)).toSet
   }
 
   private def publishContents(
@@ -28,15 +30,20 @@ object PathAndContentTestSuite extends TestSuite {
   ) =
     PathAndContent.publishContents(
       new PublishingOps {
+
         def fetchArticleByPath(path: String): Either[Failure, Option[String]] = Right(previousArticles.get(path))
 
         def fetchTopicByPath(path: String): Either[Failure, Option[String]] = Right(previousTopics.get(path))
+
+        def fetchSitemap(): Either[Failure, Set[URI]] = Right(Fixtures.sitemap)
 
         def storeArticle(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
           Right(PathAndContent(s"testArticles/${pathAndContent.path}", pathAndContent.content))
 
         def storeTopic(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
           Right(PathAndContent(s"testTopics/${pathAndContent.path}", pathAndContent.content))
+
+        def storeSitemap(urls: Set[URI]): Either[Failure, Unit] = Right(())
 
         def deleteArticleByPath(path: String): Either[Failure, String] = Left(NotFoundFailure)
       }
@@ -48,15 +55,20 @@ object PathAndContentTestSuite extends TestSuite {
   ) =
     PathAndContent.takeDownArticle(
       new PublishingOps {
+
         def fetchArticleByPath(path: String): Either[Failure, Option[String]] = Right(articles.get(path))
 
         def fetchTopicByPath(path: String): Either[Failure, Option[String]] = Right(topics.get(path))
+
+        def fetchSitemap(): Either[Failure, Set[URI]] = Right(Fixtures.sitemap)
 
         def storeArticle(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
           Left(RequestFailure("unexpected"))
 
         def storeTopic(pathAndContent: PathAndContent): Either[Failure, PathAndContent] =
           Right(PathAndContent(s"testTopics/${pathAndContent.path}", pathAndContent.content))
+
+        def storeSitemap(urls: Set[URI]): Either[Failure, Unit] = Right(())
 
         def deleteArticleByPath(path: String): Either[Failure, String] = Right(s"testArticles/$path")
       }
@@ -109,7 +121,7 @@ object PathAndContentTestSuite extends TestSuite {
             |    }
             |}""".stripMargin)
         test("number of files published") {
-          published.map(_.length) ==> Right(2)
+          published.map(_.length) ==> Right(3)
         }
         test("article published") {
           published.map(_(0)) ==> Right(
@@ -124,6 +136,17 @@ object PathAndContentTestSuite extends TestSuite {
             PathAndContent(
               "testTopics/website",
               """{"path":"website","title":"The Guardian website","articles":[{"path":"can-i-read-your-papermagazines-online","title":"Can I read your paper/magazines online?"},{"path":"id-like-to-make-a-complaint-about-an-advertisement","title":"I'd like to make a complaint about an advertisement"},{"path":"im-unable-to-comment-and-need-help","title":"I'm unable to comment and need help"}]}"""
+            )
+          )
+        }
+        test("sitemap updated") {
+          published.map(_(2)) ==> Right(
+            PathAndContent(
+              "DEV/sitemap.txt",
+              """https://manage.thegulocal.com/help-centre/article/article1
+                |https://manage.thegulocal.com/help-centre/article/article2
+                |https://manage.thegulocal.com/help-centre/article/article3
+                |https://manage.thegulocal.com/help-centre/article/can-i-read-your-papermagazines-online""".stripMargin
             )
           )
         }
@@ -173,7 +196,7 @@ object PathAndContentTestSuite extends TestSuite {
             |    }
             |}""".stripMargin)
         test("number of files published") {
-          published.map(_.length) ==> Right(3)
+          published.map(_.length) ==> Right(4)
         }
         test("article published") {
           published.map(_(0)) ==> Right(
@@ -196,6 +219,17 @@ object PathAndContentTestSuite extends TestSuite {
             PathAndContent(
               "testTopics/more-topics",
               """{"path":"more-topics","title":"More topics","topics":[{"path":"archives","title":"Back issues and archives","articles":[{"path":"can-i-read-your-papermagazines-online","title":"Can I read your paper/magazines online?"},{"path":"id-like-to-make-a-complaint-about-an-advertisement","title":"I'd like to make a complaint about an advertisement"},{"path":"im-unable-to-comment-and-need-help","title":"I'm unable to comment and need help"}]}]}"""
+            )
+          )
+        }
+        test("sitemap updated") {
+          published.map(_(3)) ==> Right(
+            PathAndContent(
+              "DEV/sitemap.txt",
+              """https://manage.thegulocal.com/help-centre/article/article1
+                |https://manage.thegulocal.com/help-centre/article/article2
+                |https://manage.thegulocal.com/help-centre/article/article3
+                |https://manage.thegulocal.com/help-centre/article/can-i-read-your-papermagazines-online""".stripMargin
             )
           )
         }
@@ -250,7 +284,7 @@ object PathAndContentTestSuite extends TestSuite {
             |}""".stripMargin
         )
         test("number of files published") {
-          published.map(_.length) ==> Right(3)
+          published.map(_.length) ==> Right(4)
         }
         test("article published") {
           published.map(_(0)) ==> Right(
@@ -273,6 +307,17 @@ object PathAndContentTestSuite extends TestSuite {
             PathAndContent(
               "testTopics/more-topics",
               """{"path":"more-topics","title":"More topics","topics":[{"path":"archives","title":"Back issues and archives","articles":[{"path":"can-i-read-your-papermagazines-online","title":"Can I read your paper/magazines online?"},{"path":"id-like-to-make-a-complaint-about-an-advertisement","title":"I'd like to make a complaint about an advertisement"},{"path":"im-unable-to-comment-and-need-help","title":"I'm unable to comment and need help"}]},{"path":"events","title":"Events","articles":[{"path":"e1","title":"I can no longer attend the live online event, can I have a refund?"},{"path":"e2","title":"I can’t find my original confirmation email, can you resend me the event link?"},{"path":"e3","title":"Once I have purchased a ticket, how will I attend the online event?"},{"path":"e4","title":"I purchased a book with my ticket, when will I receive this?"}]},{"path":"gifting","title":"Gifting","articles":[{"path":"g1","title":"Gifting a Digital Subscription"}]},{"path":"newsletters-and-emails","title":"Newsletters and emails","articles":[{"path":"n1","title":"I'm not receiving any emails from you but think I should be"},{"path":"n2","title":"Manage your email preferences"}]},{"path":"the-guardian-apps","title":"The Guardian apps","articles":[{"path":"a2","title":"Apple/Google subscriptions"},{"path":"a3","title":"Personalising your apps"},{"path":"a1","title":"Premium tier access"}]}]}"""
+            )
+          )
+        }
+        test("sitemap updated") {
+          published.map(_(3)) ==> Right(
+            PathAndContent(
+              "DEV/sitemap.txt",
+              """https://manage.thegulocal.com/help-centre/article/article1
+                |https://manage.thegulocal.com/help-centre/article/article2
+                |https://manage.thegulocal.com/help-centre/article/article3
+                |https://manage.thegulocal.com/help-centre/article/can-i-read-your-papermagazines-online""".stripMargin
             )
           )
         }
@@ -327,7 +372,7 @@ object PathAndContentTestSuite extends TestSuite {
             |}""".stripMargin
         )
         test("number of files published") {
-          published.map(_.length) ==> Right(3)
+          published.map(_.length) ==> Right(4)
         }
         test("article published") {
           published.map(_(0)) ==> Right(
@@ -350,6 +395,17 @@ object PathAndContentTestSuite extends TestSuite {
             PathAndContent(
               "testTopics/delivery",
               """{"path":"delivery","title":"Delivery","articles":[{"path":"can-i-read-your-papermagazines-online","title":"Can I read your paper/magazines online?"},{"path":"id-like-to-make-a-complaint-about-an-advertisement","title":"I'd like to make a complaint about an advertisement"},{"path":"im-unable-to-comment-and-need-help","title":"I'm unable to comment and need help"}]}"""
+            )
+          )
+        }
+        test("sitemap updated") {
+          published.map(_(3)) ==> Right(
+            PathAndContent(
+              "DEV/sitemap.txt",
+              """https://manage.thegulocal.com/help-centre/article/article1
+                |https://manage.thegulocal.com/help-centre/article/article2
+                |https://manage.thegulocal.com/help-centre/article/article3
+                |https://manage.thegulocal.com/help-centre/article/how-can-i-redirect-my-delivery""".stripMargin
             )
           )
         }

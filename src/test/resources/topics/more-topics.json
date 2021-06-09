@@ -21,6 +21,10 @@
         {
           "path": "a1",
           "title": "Premium tier access"
+        },
+        {
+          "path": "changing-my-contribution-amount",
+          "title": "Changing my contribution amount"
         }
       ]
     },

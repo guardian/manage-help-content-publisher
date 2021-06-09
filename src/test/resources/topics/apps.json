@@ -17,6 +17,10 @@
     {
       "path": "im-unable-to-comment-and-need-help",
       "title": "I'm unable to comment and need help"
+    },
+    {
+      "path": "changing-my-contribution-amount",
+      "title": "Changing my contribution amount"
     }
   ]
 }

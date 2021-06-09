@@ -88,7 +88,7 @@ object PathAndContent {
         } else {
           val newSitemap = oldSitemap + articleUrl
           publishingOps.storeSitemap(newSitemap) map (_ =>
-            Some(PathAndContent(config.aws.sitemapFile, newSitemap.mkString("\n")))
+            Some(PathAndContent(config.aws.sitemapFile, newSitemap.toSeq.sorted.mkString("\n")))
           )
         }
       }
@@ -120,7 +120,16 @@ object PathAndContent {
     * @return List of PathAndContents modified.<br />
     *         The meaning of Path depends on the implementation of deleteArticleByPath and storeTopic.
     */
-  def takeDownArticle(publishingOps: PublishingOps)(path: String): Either[Failure, Seq[PathAndContent]] =
+  def takeDownArticle(publishingOps: PublishingOps)(path: String): Either[Failure, Seq[PathAndContent]] = {
+
+    def removeFromSitemap(article: Article): Either[Failure, Option[PathAndContent]] =
+      for {
+        oldSitemap <- publishingOps.fetchSitemap()
+        articleUrl = new URI(s"${config.articleUrlPrefix}/${article.path}")
+        newSitemap = oldSitemap - articleUrl
+        _ <- publishingOps.storeSitemap(newSitemap)
+      } yield Some(PathAndContent(config.aws.sitemapFile, newSitemap.toSeq.sorted.mkString("\n")))
+
     for {
       optArticleJson <- publishingOps.fetchArticleByPath(path)
       articleJson <- optArticleJson.toRight(NotFoundFailure)
@@ -128,5 +137,10 @@ object PathAndContent {
       topicsArticleRemovedFrom <- removeFromTopics(publishingOps)(article, article.topics)
       moreTopicsWithoutArticle <- publishMoreTopics(publishingOps)(Some(article), Nil)
       deletedPath <- publishingOps.deleteArticleByPath(path)
-    } yield topicsArticleRemovedFrom ++ moreTopicsWithoutArticle.toSeq :+ PathAndContent(deletedPath, "")
+      updatedSitemap <- removeFromSitemap(article)
+    } yield (topicsArticleRemovedFrom ++
+      moreTopicsWithoutArticle.toSeq :+
+      PathAndContent(deletedPath, "")) ++
+      updatedSitemap.toSeq
+  }
 }

@@ -1,0 +1,44 @@
+{
+  "title": "Changing my contribution amount",
+  "body": [
+    {
+      "element": "p",
+      "content": [
+        {
+          "element": "text",
+          "content": "If your contribution is recurring, you can change the amount you pay by logging into your "
+        },
+        {
+          "element": "a",
+          "content": [
+            {
+              "element": "text",
+              "content": "Manage My Account "
+            }
+          ],
+          "href": "https://manage.theguardian.com/"
+        },
+        {
+          "element": "text",
+          "content": "area. You will need to sign in using the email address you registered with."
+        }
+      ]
+    },
+    {
+      "element": "p",
+      "content": [
+        {
+          "element": "text",
+          "content": "Select “Manage recurring contribution” and then “change amount” to select another value."
+        }
+      ]
+    }
+  ],
+  "path": "changing-my-contribution-amount",
+  "topics": [
+    {
+      "path": "apps",
+      "title": "Apps"
+    }
+  ]
+}

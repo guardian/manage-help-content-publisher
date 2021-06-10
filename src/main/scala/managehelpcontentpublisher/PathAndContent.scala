@@ -6,8 +6,12 @@ import managehelpcontentpublisher.Eithers._
 import managehelpcontentpublisher.InputModel.readInput
 import managehelpcontentpublisher.MoreTopics.{readMoreTopics, writeMoreTopics}
 import managehelpcontentpublisher.Topic.{readTopic, writeTopic}
+import scalaj.http.{Http, HttpResponse}
 
 import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.chaining.scalaUtilChainingOps
 
 case class PathAndContent(path: String, content: String)
 
@@ -54,6 +58,10 @@ object PathAndContent {
       } yield result
   }
 
+  // Fire-and-forget nudge to re-ingest sitemap
+  private def pingGoogle(): Future[HttpResponse[String]] =
+    Future(Http(s"${config.sitemap.googlePingUrl}?sitemap=${config.sitemap.url}").asString)
+
   /** Publishes the contents of the given Json string
     * to representations of an Article and multiple Topics
     * suitable to be rendered by a web layer.
@@ -87,9 +95,10 @@ object PathAndContent {
           Right(None)
         } else {
           val newSitemap = oldSitemap + articleUrl
-          publishingOps.storeSitemap(newSitemap) map (_ =>
-            Some(PathAndContent(config.aws.sitemapFile, newSitemap.toSeq.sorted.mkString("\n")))
-          )
+          publishingOps
+            .storeSitemap(newSitemap).map(_ =>
+              Some(PathAndContent(config.aws.sitemapFile, newSitemap.toSeq.sorted.mkString("\n")))
+            ).tap(_ => pingGoogle())
         }
       }
 
@@ -127,7 +136,7 @@ object PathAndContent {
         oldSitemap <- publishingOps.fetchSitemap()
         articleUrl = new URI(s"${config.articleUrlPrefix}/${article.path}")
         newSitemap = oldSitemap - articleUrl
-        _ <- publishingOps.storeSitemap(newSitemap)
+        _ <- publishingOps.storeSitemap(newSitemap).tap(_ => pingGoogle())
       } yield Some(PathAndContent(config.aws.sitemapFile, newSitemap.toSeq.sorted.mkString("\n")))
 
     for {

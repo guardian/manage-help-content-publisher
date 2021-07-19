@@ -231,24 +231,68 @@ object HtmlToJsonTestSuite extends TestSuite {
                                             |  }
                                             |]""".stripMargin
       }
+      test("in middle of paragraph containing a link") {
+        HtmlToJson("""<p>xyz<br />abc<a href="https://support.theguardian.com/">click here</a>def</p>""")
+          .render(indent = 2) ==>
+          """|[
+             |  {
+             |    "element": "p",
+             |    "content": [
+             |      {
+             |        "element": "text",
+             |        "content": "xyz"
+             |      }
+             |    ]
+             |  },
+             |  {
+             |    "element": "p",
+             |    "content": [
+             |      {
+             |        "element": "text",
+             |        "content": "abc"
+             |      },
+             |      {
+             |        "element": "a",
+             |        "content": [
+             |          {
+             |            "element": "text",
+             |            "content": "click here"
+             |          }
+             |        ],
+             |        "href": "https://support.theguardian.com/"
+             |      },
+             |      {
+             |        "element": "text",
+             |        "content": "def"
+             |      }
+             |    ]
+             |  }
+             |]""".stripMargin
+      }
     }
 
     test("Element a") {
       HtmlToJson(
-        """<a href="https://support.theguardian.com/uk/subscribe/digital" target="_blank">digital subscription</a>"""
+        """<p><a href="https://support.theguardian.com/uk/subscribe/digital" target="_blank">digital subscription</a></p>"""
       )
-        .render(indent = 2) ==> """[
-                                        |  {
-                                        |    "element": "a",
-                                        |    "content": [
-                                        |      {
-                                        |        "element": "text",
-                                        |        "content": "digital subscription"
-                                        |      }
-                                        |    ],
-                                        |    "href": "https://support.theguardian.com/uk/subscribe/digital"
-                                        |  }
-                                        |]""".stripMargin
+        .render(indent = 2) ==>
+        """|[
+           |  {
+           |    "element": "p",
+           |    "content": [
+           |      {
+           |        "element": "a",
+           |        "content": [
+           |          {
+           |            "element": "text",
+           |            "content": "digital subscription"
+           |          }
+           |        ],
+           |        "href": "https://support.theguardian.com/uk/subscribe/digital"
+           |      }
+           |    ]
+           |  }
+           |]""".stripMargin
     }
 
     test("Element b") {

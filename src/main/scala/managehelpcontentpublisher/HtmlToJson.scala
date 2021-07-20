@@ -2,7 +2,7 @@ package managehelpcontentpublisher
 
 import org.jsoup._
 import org.jsoup.nodes._
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 
 import scala.jdk.CollectionConverters._
 
@@ -32,7 +32,7 @@ object HtmlToJson {
     }
 
     def unsupportedAttributesRemoved(e: Element): Element =
-      Jsoup.parseBodyFragment(Jsoup.clean(e.outerHtml, Whitelist.relaxed())).body
+      Jsoup.parseBodyFragment(Jsoup.clean(e.outerHtml, Safelist.relaxed())).body
 
     def lineBreaksRemoved(e: Element): Element = {
 
@@ -75,8 +75,8 @@ object HtmlToJson {
       "content" -> e.childNodes.asScala.toList.map(htmlToJson)
     )
     e.attributes.asList.asScala.foldLeft(obj)((acc, attribute) =>
-      acc.copy(acc.value ++ Map(attribute.getKey -> attribute.getValue))
-    )
+        acc.copy(acc.value ++ Map(attribute.getKey -> attribute.getValue))
+      )
   }
 
   private val elementTransformations = Map("strong" -> "b", "em" -> "i")

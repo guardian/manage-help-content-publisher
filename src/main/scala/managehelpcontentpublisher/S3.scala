@@ -2,6 +2,7 @@ package managehelpcontentpublisher
 
 import managehelpcontentpublisher.Config.config
 import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.http.apache.ApacheHttpClient
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.{
   DeleteObjectRequest,
@@ -15,7 +16,11 @@ import scala.util.Try
 
 object S3 {
 
-  private val client = S3Client.builder().region(config.aws.region).build()
+  /*
+   * By explicitly specifying which HTTP client to use, we save an expensive operation
+   * looking for a suitable HTTP client on the classpath.
+   */
+  private val client = S3Client.builder.httpClientBuilder(ApacheHttpClient.builder).region(config.aws.region).build()
 
   private def get(key: String): Either[Failure, Option[String]] =
     Try(

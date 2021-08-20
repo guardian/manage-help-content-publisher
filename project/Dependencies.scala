@@ -15,6 +15,6 @@ object Dependencies {
   lazy val utest = "com.lihaoyi" %% "utest" % "0.7.10"
   lazy val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
   lazy val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.9.0"
-  lazy val s3 = "software.amazon.awssdk" % "s3" % "2.17.0"
+  lazy val s3 = "software.amazon.awssdk" % "s3" % "2.17.24"
   lazy val slf4jNop = "org.slf4j" % "slf4j-nop" % "2.0.0-alpha2"
 }

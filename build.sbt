@@ -1,7 +1,7 @@
 import Dependencies._
 import com.gu.riffraff.artifact.BuildInfo
 
-ThisBuild / scalaVersion := "2.13.8"
+ThisBuild / scalaVersion := "2.13.10"
 
 ThisBuild / scalacOptions += "-deprecation"
 

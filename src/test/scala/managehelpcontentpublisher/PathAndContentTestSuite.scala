@@ -81,7 +81,7 @@ object PathAndContentTestSuite extends TestSuite {
 
     test("publishContents") {
       test("When article has a core topic") {
-        val json = jsonFileToString("api_input/article-with-core-topic")
+        val json = jsonFileToString("api_input/input1")
 
         val published = publishContents()(json)
         test("number of files published") {
@@ -118,7 +118,7 @@ object PathAndContentTestSuite extends TestSuite {
       }
 
       test("Newly published article") {
-        val published = publishContents()(jsonFileToString("api_input/new-article-request-body"))
+        val published = publishContents()(jsonFileToString("api_input/input2"))
 
         test("number of files published") {
           published.map(_.length) ==> Right(6)
@@ -170,48 +170,7 @@ object PathAndContentTestSuite extends TestSuite {
       }
 
       test("When article has a non-core topic and 'More topics' is empty") {
-        val published = publishContents()("""{
-            |    "dataCategories": [
-            |        {
-            |            "publishedArticles": [
-            |                {
-            |                    "urlName": "id-like-to-make-a-complaint-about-an-advertisement",
-            |                    "title": "I'd like to make a complaint about an advertisement",
-            |                    "id": "id1",
-            |                    "dataCategories": [],
-            |                    "body": null
-            |                },
-            |                {
-            |                    "urlName": "can-i-read-your-papermagazines-online",
-            |                    "title": "Can I read your paper/magazines online?",
-            |                    "id": "id2",
-            |                    "dataCategories": [],
-            |                    "body": null
-            |                },
-            |                {
-            |                    "urlName": "im-unable-to-comment-and-need-help",
-            |                    "title": "I'm unable to comment and need help",
-            |                    "id": "id3",
-            |                    "dataCategories": [],
-            |                    "body": null
-            |                }
-            |            ],
-            |            "name": "archives__c"
-            |        }
-            |    ],
-            |    "article": {
-            |        "urlName": "can-i-read-your-papermagazines-online",
-            |        "title": "Can I read your paper/magazines online?",
-            |        "id": "id2",
-            |        "dataCategories": [
-            |            {
-            |                "name": "archives__c",
-            |                "label": "Back issues and archives"
-            |            }
-            |        ],
-            |        "body": "<p>We do not</p>"
-            |    }
-            |}""".stripMargin)
+        val published = publishContents()(jsonFileToString("api_input/input3"))
         test("number of files published") {
           published.map(_.length) ==> Right(4)
         }
@@ -257,50 +216,7 @@ object PathAndContentTestSuite extends TestSuite {
         val published = publishContents(
           previousArticles = Map(Fixtures.article2),
           previousTopics = Map(Fixtures.moreTopics)
-        )(
-          """{
-            |    "dataCategories": [
-            |        {
-            |            "publishedArticles": [
-            |                {
-            |                    "urlName": "id-like-to-make-a-complaint-about-an-advertisement",
-            |                    "title": "I'd like to make a complaint about an advertisement",
-            |                    "id": "id1",
-            |                    "dataCategories": [],
-            |                    "body": null
-            |                },
-            |                {
-            |                    "urlName": "can-i-read-your-papermagazines-online",
-            |                    "title": "Can I read your paper/magazines online?",
-            |                    "id": "id2",
-            |                    "dataCategories": [],
-            |                    "body": null
-            |                },
-            |                {
-            |                    "urlName": "im-unable-to-comment-and-need-help",
-            |                    "title": "I'm unable to comment and need help",
-            |                    "id": "id3",
-            |                    "dataCategories": [],
-            |                    "body": null
-            |                }
-            |            ],
-            |            "name": "archives__c"
-            |        }
-            |    ],
-            |    "article": {
-            |        "urlName": "can-i-read-your-papermagazines-online",
-            |        "title": "Can I read your paper/magazines online?",
-            |        "id": "id2",
-            |        "dataCategories": [
-            |            {
-            |                "name": "archives__c",
-            |                "label": "Back issues and archives"
-            |            }
-            |        ],
-            |        "body": "<p>We do not</p>"
-            |    }
-            |}""".stripMargin
-        )
+        )(jsonFileToString("api_input/input4"))
         test("number of files published") {
           published.map(_.length) ==> Right(4)
         }
@@ -346,50 +262,7 @@ object PathAndContentTestSuite extends TestSuite {
         val published = publishContents(
           previousArticles = Map(Fixtures.article1),
           previousTopics = Map(Fixtures.deliveryTopic)
-        )(
-          """{
-            |    "dataCategories": [
-            |        {
-            |            "publishedArticles": [
-            |                {
-            |                    "urlName": "id-like-to-make-a-complaint-about-an-advertisement",
-            |                    "title": "I'd like to make a complaint about an advertisement",
-            |                    "id": "id1",
-            |                    "dataCategories": [],
-            |                    "body": null
-            |                },
-            |                {
-            |                    "urlName": "how-can-i-redirect-my-delivery",
-            |                    "title": "How can I redirect my delivery?",
-            |                    "id": "id2",
-            |                    "dataCategories": [],
-            |                    "body": null
-            |                },
-            |                {
-            |                    "urlName": "im-unable-to-comment-and-need-help",
-            |                    "title": "I'm unable to comment and need help",
-            |                    "id": "id3",
-            |                    "dataCategories": [],
-            |                    "body": null
-            |                }
-            |            ],
-            |            "name": "website__c"
-            |        }
-            |    ],
-            |    "article": {
-            |        "urlName": "how-can-i-redirect-my-delivery",
-            |        "title": "How can I redirect my delivery?",
-            |        "id": "id2",
-            |        "dataCategories": [
-            |            {
-            |                "name": "website__c",
-            |                "label": "The Guardian website"
-            |            }
-            |        ],
-            |        "body": "<p>We do not</p>"
-            |    }
-            |}""".stripMargin
-        )
+        )(jsonFileToString("api_input/input5"))
         test("number of files published") {
           published.map(_.length) ==> Right(4)
         }

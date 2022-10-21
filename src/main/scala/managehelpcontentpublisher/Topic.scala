@@ -22,7 +22,7 @@ object Topic {
     } yield publishedArticle.urlName).distinct
 
     /*
-        Refer to PR:
+        Refer to PR: https://github.com/guardian/manage-help-content-publisher/pull/501
      */
     def addNewArticleToTopics(cat: DataCategory) =
       if (!publishedArticleUrls.contains(newArticle.urlName))

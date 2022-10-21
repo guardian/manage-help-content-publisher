@@ -7,11 +7,13 @@ It also holds [a sub-project to import articles into Salesforce from Capi](legac
 
 There's a folder for useful scripts [here](scripts).
 
-algorithm
+The Repo/API has two endpoints:
 
-When publishing an article:
+1. **When publishing an article:**
 
-1. publisharticle function is called
-2. the 'article' key is read from the json body as the new article
-3. the 'dataCategories' are read in from the json body as the 'Topics', each item in the array is converted to Topic type, encoded into JSON and stored in S3 with the filename being the `path` property
-4. 
+- `publishContents` function is called
+- JSON file for each topic containing all associated articles is produced and stored in a folder in S3 with path `manage-help-content` > `topics`  
+- JSON file for the input article is produced and stored in a folder in S3 with path `manage-help-content` > `articles`
+- `sitemap.txt` is produced
+
+**2. When removing an article**

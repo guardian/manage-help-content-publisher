@@ -10,11 +10,10 @@ import scala.io.Source
   */
 object PathAndContentTestSuite extends TestSuite {
 
-  def jsonFileToString(path: String): String = Source.fromResource(s"$path.json").mkString
-
   object Fixtures {
 
-    def resource(kind: String, id: String): (String, String) = id -> Source.fromResource(s"${kind}s/$id.json").mkString
+    def resource(kind: String, id: String): (String, String) =
+      id -> Source.fromResource(s"${kind}s/$id.json").mkString
     def article(id: String): (String, String) = resource("article", id)
     def topic(id: String): (String, String) = resource("topic", id)
 
@@ -81,9 +80,48 @@ object PathAndContentTestSuite extends TestSuite {
 
     test("publishContents") {
       test("When article has a core topic") {
-        val json = jsonFileToString("api_input/article-with-core-topic")
-
-        val published = publishContents()(json)
+        val published = publishContents()("""{
+            |    "dataCategories": [
+            |        {
+            |            "publishedArticles": [
+            |                {
+            |                    "urlName": "id-like-to-make-a-complaint-about-an-advertisement",
+            |                    "title": "I'd like to make a complaint about an advertisement",
+            |                    "id": "id1",
+            |                    "dataCategories": [],
+            |                    "body": null
+            |                },
+            |                {
+            |                    "urlName": "can-i-read-your-papermagazines-online",
+            |                    "title": "Can I read your paper/magazines online?",
+            |                    "id": "id2",
+            |                    "dataCategories": [],
+            |                    "body": null
+            |                },
+            |                {
+            |                    "urlName": "im-unable-to-comment-and-need-help",
+            |                    "title": "I'm unable to comment and need help",
+            |                    "id": "id3",
+            |                    "dataCategories": [],
+            |                    "body": null
+            |                }
+            |            ],
+            |            "name": "website__c"
+            |        }
+            |    ],
+            |    "article": {
+            |        "urlName": "can-i-read-your-papermagazines-online",
+            |        "title": "Can I read your paper/magazines online?",
+            |        "id": "id2",
+            |        "dataCategories": [
+            |            {
+            |                "name": "website__c",
+            |                "label": "The Guardian website"
+            |            }
+            |        ],
+            |        "body": "<p>We do not</p>"
+            |    }
+            |}""".stripMargin)
         test("number of files published") {
           published.map(_.length) ==> Right(3)
         }
@@ -112,58 +150,6 @@ object PathAndContentTestSuite extends TestSuite {
                 |https://manage.thegulocal.com/help-centre/article/article3
                 |https://manage.thegulocal.com/help-centre/article/can-i-read-your-papermagazines-online
                 |https://manage.thegulocal.com/help-centre/article/changing-my-contribution-amount""".stripMargin
-            )
-          )
-        }
-      }
-
-      test("Newly published article") {
-        val published = publishContents()(jsonFileToString("api_input/new-article-request-body"))
-
-        test("number of files published") {
-          published.map(_.length) ==> Right(6)
-        }
-        test("article published") {
-          published.map(_(0)) ==> Right(
-            PathAndContent(
-              "testArticles/how-to-stay-signed-in",
-              """{"title":"How to stay signed in","body":[{"element":"p","content":[{"element":"text","content":"When you are signing into the Guardian website, we place a cookie in your browser that should recognise you when you return. This will not happen if your browser is set up in such a way as to block or delete cookies, although this will affect all of the sites that you visit. If you are getting this across multiple sites, the settings to check in your browser are:"}]},{"element":"p","content":[{"element":"text","content":"1. Whether you are running your browser in a private or incognito mode (this happens fairly regularly for people on Safari on iOS)."}]},{"element":"p","content":[{"element":"text","content":"2. What the cookie settings in your browser are (accepting cookies from sites you visit should cover this)."}]},{"element":"p","content":[{"element":"text","content":"3. Whether you are running any browser extensions or add-ons that block or clear cookies to protect your privacy."}]},{"element":"p","content":[{"element":"text","content":"If it is only the Guardian that you are having trouble with it may be that your sign in cookie has become corrupted. We would suggest that you try clearing any Guardian cookies from your browser and signing back in."}]},{"element":"p","content":[{"element":"text","content":"If the above doesn’t work, or if you would like more detailed instructions on how to do any of the above, please get in touch using the contact details at the bottom of this page and note the name of the browser that you are using."}]}],"path":"how-to-stay-signed-in","topics":[{"path":"accounts","title":"Accounts and sign in"},{"path":"apps","title":"The Guardian apps"},{"path":"website","title":"The Guardian website"}]}"""
-            )
-          )
-        }
-        test("accounts topic published") {
-          published.map(_(1)) ==> Right(
-            PathAndContent(
-              "testTopics/accounts",
-              """{"path":"accounts","title":"Accounts and sign in","articles":[{"path":"how-to-sign-in-using-a-computer","title":"How to sign in using a computer"},{"path":"how-to-sign-in-using-a-mobile-tablet","title":"How to sign in using a mobile/tablet"},{"path":"how-to-stay-signed-in","title":"How to stay signed in"},{"path":"i-need-help-signing-in","title":"I need help signing in"},{"path":"i-need-to-change-my-contact-details","title":"I need to change my contact details"},{"path":"i-want-to-delete-my-account","title":"I want to delete my account"},{"path":"i-ve-forgotten-my-password","title":"I've forgotten my password"},{"path":"i-need-to-update-my-email-preferences","title":"Manage your email preferences"},{"path":"signing-in-on-multiple-devices","title":"Signing in on multiple devices"},{"path":"what-does-signing-in-mean-for-my-data","title":"What does signing in mean for my data?"}]}"""
-            )
-          )
-        }
-        test("app topic published") {
-          published.map(_(2)) ==> Right(
-            PathAndContent(
-              "testTopics/apps",
-              """{"path":"apps","title":"The Guardian apps","articles":[{"path":"what-devices-are-compatible-with-your-apps","title":"Device compatibility"},{"path":"getting-started-with-your-digital-subscription","title":"Getting started with your Digital Subscription"},{"path":"i-have-a-googleitunes-subscription-that-i-need-help-with","title":"Google/Apple subscriptions"},{"path":"how-can-i-get-full-access-to-the-app-as-a-contributor","title":"How can I get full access to the app?"},{"path":"how-to-sign-in-using-a-mobile-tablet","title":"How to sign in using a mobile/tablet"},{"path":"how-to-stay-signed-in","title":"How to stay signed in"},{"path":"i-need-help-signing-in","title":"I need help signing in"},{"path":"making-your-app-more-personal","title":"Personalising your app"},{"path":"how-can-i-gain-access-to-the-premium-tier-of-your-app","title":"Premium Tier Access"},{"path":"why-am-i-still-seeing-adsbanners","title":"Why am I still seeing ads/banners?"}]}"""
-            )
-          )
-        }
-        test("website topic published") {
-          published.map(_(3)) ==> Right(
-            PathAndContent(
-              "testTopics/website",
-              """{"path":"website","title":"The Guardian website","articles":[{"path":"can-i-read-your-papermagazines-online","title":"Can I read your paper/magazines online?"},{"path":"how-to-stay-signed-in","title":"How to stay signed in"},{"path":"id-like-to-make-a-complaint-about-an-advertisement","title":"I'd like to make a complaint about an advertisement"},{"path":"im-unable-to-comment-and-need-help","title":"I'm unable to comment and need help"},{"path":"ive-found-a-bug-how-can-i-report-it","title":"I’ve found a bug, how can I report it?"},{"path":"why-am-i-still-seeing-adsbanners","title":"Why am I still seeing ads/banners?"},{"path":"why-have-i-been-banned-from-commenting","title":"Why have I been banned from commenting?"}]}"""
-            )
-          )
-        }
-        test("sitemap updated") {
-          published.map(_(5)) ==> Right(
-            PathAndContent(
-              "DEV/sitemap.txt",
-              """https://manage.thegulocal.com/help-centre/article/article1
-                |https://manage.thegulocal.com/help-centre/article/article2
-                |https://manage.thegulocal.com/help-centre/article/article3
-                |https://manage.thegulocal.com/help-centre/article/changing-my-contribution-amount
-                |https://manage.thegulocal.com/help-centre/article/how-to-stay-signed-in""".stripMargin
             )
           )
         }

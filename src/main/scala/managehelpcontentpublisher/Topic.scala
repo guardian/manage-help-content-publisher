@@ -22,7 +22,7 @@ object Topic {
     } yield publishedArticle.urlName).distinct
 
     /*
-        Refer to PR: https://github.com/guardian/manage-help-content-publisher/pull/501
+        If this is a newly published article, this will be manually added to each topic list. Refer to PR: https://github.com/guardian/manage-help-content-publisher/pull/501
      */
     def addNewArticleToTopics(cat: DataCategory) =
       if (!publishedArticleUrls.contains(newArticle.urlName))

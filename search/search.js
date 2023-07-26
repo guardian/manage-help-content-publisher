@@ -41,8 +41,7 @@ function computeKeywordsWithOccurence(sourceJson, stopwords) {
 
 function getListOfWordsExcludingStopWords(articleText, stopwords) {
 	return (articleText || "")
-		.replace(/\/\n+/g, " ")
-		.replace(/["'“”’,.:]/g, " ")
+		.replace(/[\/\n+()+?@*"'“”’,.:;\d]+/g, " ")
 		.toLowerCase()
 		.trim()
 		.split(/\s+/)

@@ -14,10 +14,9 @@ Parameters:
     Default: manage-help-content-publisher
 
 Conditions:
-  IsProd: !Equals [ !Ref Stage, PROD ]
+  IsProd: !Equals [!Ref Stage, PROD]
 
 Resources:
-
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -72,6 +71,70 @@ Resources:
             Method: POST
             RestApiId:
               Ref: ApiGateway
+
+  SearchIndexLambda:
+    Type: AWS::Serverless::Function
+    DependsOn: LogGroup
+    Properties:
+      FunctionName: !Sub ${AppName}-search-index-${Stage}
+      Description: >
+        Codebase: https://github.com/guardian/manage-help-content-publisher.
+      Policies:
+        - Statement:
+            - Sid: S3BucketListPolicy
+              Effect: Allow
+              Action:
+                - s3:ListBucket
+              Resource:
+                # It shouldn't be necessary to have a separate list policy but there seems to be a bug in the S3 service somewhere
+                - arn:aws:s3:::manage-help-content*
+        - Statement:
+            - Sid: S3BucketPolicy
+              Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+              Resource:
+                - !Sub arn:aws:s3:::manage-help-content/${Stage}/*
+        - Statement:
+            - Sid: s3Deploy
+              Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - arn:aws:s3::*:membership-dist/*
+      Handler: search-index.handler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      EphemeralStorage:
+        Size: 256
+      CodeUri: .
+      Environment:
+        Variables:
+          stage: !Ref Stage
+      Timeout: 3
+      MemorySize: 128
+      Events:
+        BucketEvent1:
+        Type: S3
+        Properties:
+          Bucket:
+            Ref: Bucket1
+          Events:
+            - "s3:ObjectCreated:*"
+          Filter:
+            S3Key:
+              Rules:
+                - Name: suffix
+                  Value: .json
+      RuntimeManagementConfig:
+      UpdateRuntimeOn: Auto
+      SnapStart:
+        ApplyOn: None
+      PackageType: Zip
 
   TakingDownLogGroup:
     Type: AWS::Logs::LogGroup

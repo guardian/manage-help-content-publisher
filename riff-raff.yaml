@@ -12,7 +12,7 @@ deployments:
   manage-help-content-publisher:
     type: aws-lambda
     parameters:
-      bucket: membership-dist
+      bucketSsmLookup: true
       fileName: manage-help-content-publisher.jar
       functionNames:
         - manage-help-content-publisher-

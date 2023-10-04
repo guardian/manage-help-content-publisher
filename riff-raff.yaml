@@ -3,7 +3,6 @@ stacks:
 regions:
   - eu-west-1
 deployments:
-
   cfn:
     type: cloud-formation
     app: manage-help-content-publisher

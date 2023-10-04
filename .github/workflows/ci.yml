@@ -34,16 +34,16 @@ jobs:
           java-version: '11'
           cache: 'sbt'
 
-      - name: RiffRaffUpload
-        run: sbt clean riffRaffUpload
+      - name: Compile and package project
+        run: sbt clean assembly
 
-#      - name: Upload to Riff-Raff
-#        uses: guardian/actions-riff-raff@v2
-#        with:
-#          app: manage-help-content-publisher
-#          configPath: ./riff-raff.yaml
-#          contentDirectories: |
-#            cfn:
-#              - ./cfn.yaml
-#            manage-help-content-publisher:
-#              - ./manage-help-content-publisher.jar
+      - name: Upload to Riff-Raff
+        uses: guardian/actions-riff-raff@v2
+        with:
+          app: manage-help-content-publisher
+          configPath: ./riff-raff.yaml
+          contentDirectories: |
+            cfn:
+              - ./cfn.yaml
+            manage-help-content-publisher:
+              - ./manage-help-content-publisher.jar

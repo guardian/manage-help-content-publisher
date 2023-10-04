@@ -19,7 +19,8 @@ lazy val root = (project in file("."))
   .enablePlugins(BuildInfoPlugin, RiffRaffArtifact)
   .settings(
     name := "manage-help-content-publisher",
-    assemblyJarName := s"${name.value}.jar",
+    assembly / assemblyJarName := s"${name.value}.jar",
+    assembly / assemblyOutputPath := file(s"${(assembly/assemblyJarName).value}"),
     riffRaffPackageType := assembly.value,
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),

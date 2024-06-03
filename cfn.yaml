@@ -150,7 +150,7 @@ Resources:
     DependsOn: ApiGateway
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
       AlarmName: !Sub 4XX rate from ${AppName}-${Stage}
       AlarmDescription: >
         See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting
@@ -175,7 +175,7 @@ Resources:
     DependsOn: ApiGateway
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
       AlarmName: !Sub 5XX rate from ${AppName}-${Stage}
       AlarmDescription: >
         See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting

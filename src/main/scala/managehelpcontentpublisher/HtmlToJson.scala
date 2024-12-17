@@ -68,7 +68,13 @@ object Html {
   }
 
   def unsupportedAttributesRemoved(e: Element): Element =
-    Jsoup.parseBodyFragment(Jsoup.clean(e.clone().outerHtml, "https://manage.code.dev-theguardian.com", Safelist.relaxed().preserveRelativeLinks(true))).body
+    Jsoup.parseBodyFragment(
+      Jsoup.clean(
+        e.clone().outerHtml, 
+        "https://manage.code.dev-theguardian.com", 
+        Safelist.relaxed().preserveRelativeLinks(true).addAttributes("a", "id")
+      )
+    ).body
 
   def emptyParagraphsRemoved(e: Element): Element = {
     val cleaned = e.clone()

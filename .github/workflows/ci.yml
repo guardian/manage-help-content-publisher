@@ -27,12 +27,8 @@ jobs:
           aws-region: eu-west-1
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'corretto'
-          java-version: '11'
-          cache: 'sbt'
+      - name: Setup Java and sbt
+        uses: guardian/setup-scala@v1
 
       - name: Compile and package project
         run: sbt clean assembly

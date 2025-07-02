@@ -254,7 +254,7 @@ The deployment uses a **dual-deployment strategy**:
 ```
 manage-help-content-publisher/
 ├── 📂 .github/workflows/     # CI/CD pipelines
-│   └── ci-cdk.yml           # Main deployment workflow
+│   └── ci.yml           # Main deployment workflow
 ├── 📂 bin/                  # CDK app entry point
 │   └── cdk.ts              # CDK application
 ├── 📂 lib/                  # CDK infrastructure code

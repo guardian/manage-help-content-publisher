@@ -28,9 +28,9 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm check-formatting
-      - run: pnpm lint
-      - run: pnpm test
+      - run: pnpm run check-formatting
+      - run: pnpm run lint
+      - run: pnpm run test
 
   gu-cdk-build:
     needs: common
@@ -49,16 +49,13 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-
-      # Build Scala/Java Lambda JAR
+      - run: pnpm run build
+      - run: pnpm run synth
       - name: Setup Java and sbt
         uses: guardian/setup-scala@v1
 
       - name: Compile and package Lambda
         run: sbt clean assembly
-
-      # Build CDK Infrastructure
-      - run: pnpm package
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -66,8 +63,7 @@ jobs:
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           aws-region: eu-west-1
 
-      - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4
+      - uses: guardian/actions-riff-raff@v4
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}

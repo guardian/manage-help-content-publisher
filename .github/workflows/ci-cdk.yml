@@ -1,0 +1,81 @@
+name: CI-manage-help-content-publisher
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  common:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global corepack@0.31.0
+      - run: corepack enable
+        shell: bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm check-formatting
+      - run: pnpm lint
+      - run: pnpm test
+
+  gu-cdk-build:
+    needs: common
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global corepack@0.31.0
+      - run: corepack enable
+        shell: bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install
+
+      # Build Scala/Java Lambda JAR
+      - name: Setup Java and sbt
+        uses: guardian/setup-scala@v1
+
+      - name: Compile and package Lambda
+        run: sbt clean assembly
+
+      # Build CDK Infrastructure
+      - run: pnpm package
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: Upload to Riff-Raff
+        uses: guardian/actions-riff-raff@v4
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          projectName: manage-help-content-publisher
+          configPath: ./riff-raff.yaml
+          commentingEnabled: 'true'
+          contentDirectories: |
+            cdk:
+              - ./cdk.out
+            manage-help-content-publisher:
+              - ./manage-help-content-publisher.jar

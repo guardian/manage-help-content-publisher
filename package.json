@@ -13,7 +13,8 @@
     "synth": "cdk synth --path-metadata false --version-reporting false",
     "diff": "cdk diff --path-metadata false --version-reporting false",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm synth",
-    "fix-formatting": "prettier --write **.ts"
+    "fix-formatting": "pnpm -r run fix-formatting",
+    "check-formatting": "pnpm -r run check-formatting"
   },
   "devDependencies": {
     "@guardian/cdk": "61.8.2",

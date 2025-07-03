@@ -50,6 +50,7 @@ object Main extends App {
     println("parent:" + parentNodeName + "  |generatedTag:" + generatedTag)
 
     if (nodeHasChildren(node)) {
+
       for (childNode <- node.childNodes().asScala.toSeq) {
         processChildNode(childNode, node.nodeName())
       }

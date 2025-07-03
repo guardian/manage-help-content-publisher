@@ -68,7 +68,7 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
-          projectName: manage-help-content-publisher
+          projectName: membership::manage-help-content-publisher
           configPath: ./riff-raff.yaml
           commentingEnabled: 'true'
           contentDirectories: |

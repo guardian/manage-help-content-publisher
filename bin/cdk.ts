@@ -11,7 +11,7 @@ const stages = ['CODE', 'PROD'];
 stages.forEach((stage) => {
 	new ManageHelpContentPublisherStack(
 		app,
-		`ManageHelpContentPublisher-${stage}-v2`,
+		`ManageHelpContentPublisher-${stage}`,
 		{
 			env: {
 				account: process.env.CDK_DEFAULT_ACCOUNT,

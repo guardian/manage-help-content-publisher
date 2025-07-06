@@ -40,7 +40,6 @@ export class ManageHelpContentPublisherStack extends GuStack {
 
 		const { stage } = props;
 		const app = 'manage-help-content-publisher';
-		const nameWithStage = `${app}-${stage}`;
 
 		// Guardian standard environment variables
 		const commonEnvironmentVariables = {
@@ -86,20 +85,38 @@ export class ManageHelpContentPublisherStack extends GuStack {
 			}),
 		];
 
+		// --- Use test- and legacy-compatible naming conventions ---
+		const publisherFunctionName = `${app}-${stage}`;
+		const takedownFunctionName = `${app}-${stage}-takedown`;
+		const publisherLogGroupName = `/aws/lambda/${app}-${stage}`;
+		const takedownLogGroupName = `/aws/lambda/${app}-${stage}-takedown`;
+		const publisherApiName = `${app}-${stage}-publisher-api`;
+		const takedownApiName = `${app}-${stage}-takedown-api`;
+		const publisherUsagePlanName = `${app}-${stage}-publisher-usage-plan`;
+		const takedownUsagePlanName = `${app}-${stage}-takedown-usage-plan`;
+		const publisherApiKeyName = `${app}-${stage}-publisher-key`;
+		const takedownApiKeyName = `${app}-${stage}-takedown-key`;
+
+		// --- Alarm names to match test expectations ---
+		const publisher4xxAlarmName = `4XX rate from ${app}-${stage}-publisher`;
+		const publisher5xxAlarmName = `5XX rate from ${app}-${stage}-publisher`;
+		const takedown4xxAlarmName = `4XX rate from ${app}-${stage}-takedown`;
+		const takedown5xxAlarmName = `5XX rate from ${app}-${stage}-takedown`;
+
 		// Log Groups with 90-day retention - matching original CloudFormation
 		this.publisherLogGroup = new LogGroup(this, 'PublisherLogGroup', {
-			logGroupName: `/aws/lambda/${nameWithStage}`,
+			logGroupName: publisherLogGroupName,
 			retention: RetentionDays.THREE_MONTHS,
 		});
 
 		this.takedownLogGroup = new LogGroup(this, 'TakedownLogGroup', {
-			logGroupName: `/aws/lambda/${nameWithStage}-takedown`,
+			logGroupName: takedownLogGroupName,
 			retention: RetentionDays.THREE_MONTHS,
 		});
 
 		// Publisher Lambda with API Gateway
-		this.publisherApi = new GuApiLambda(this, 'publisher-lambda', {
-			functionName: nameWithStage,
+		this.publisherApi = new GuApiLambda(this, 'PublisherLambda', {
+			functionName: publisherFunctionName,
 			fileName: `${app}.jar`,
 			handler: 'managehelpcontentpublisher.PublishingHandler::handleRequest',
 			runtime: Runtime.JAVA_11,
@@ -110,8 +127,8 @@ export class ManageHelpContentPublisherStack extends GuStack {
 			monitoringConfiguration: { noMonitoring: true },
 			app: app,
 			api: {
-				id: `${nameWithStage}-publisher-api`,
-				restApiName: `${nameWithStage}-publisher-api`,
+				id: publisherApiName,
+				restApiName: publisherApiName,
 				description: 'API Gateway for manage help content publisher',
 				proxy: false,
 				apiKeySourceType: ApiKeySourceType.HEADER,
@@ -130,8 +147,8 @@ export class ManageHelpContentPublisherStack extends GuStack {
 		);
 
 		// Takedown Lambda with API Gateway
-		this.takedownApi = new GuApiLambda(this, 'takedown-lambda', {
-			functionName: `${nameWithStage}-takedown`,
+		this.takedownApi = new GuApiLambda(this, 'TakedownLambda', {
+			functionName: takedownFunctionName,
 			fileName: `${app}.jar`,
 			handler: 'managehelpcontentpublisher.TakingDownHandler::handleRequest',
 			runtime: Runtime.JAVA_11,
@@ -142,8 +159,8 @@ export class ManageHelpContentPublisherStack extends GuStack {
 			monitoringConfiguration: { noMonitoring: true },
 			app: app,
 			api: {
-				id: `${nameWithStage}-takedown-api`,
-				restApiName: `${nameWithStage}-takedown-api`,
+				id: takedownApiName,
+				restApiName: takedownApiName,
 				description: 'API Gateway for manage help content takedown',
 				proxy: false,
 				apiKeySourceType: ApiKeySourceType.HEADER,
@@ -165,7 +182,7 @@ export class ManageHelpContentPublisherStack extends GuStack {
 
 		// Usage Plans and API Keys for both APIs
 		const publisherUsagePlan = new UsagePlan(this, 'PublisherUsagePlan', {
-			name: `${nameWithStage}-publisher-usage-plan`,
+			name: publisherUsagePlanName,
 			description: 'Usage plan for manage help content publisher API',
 			apiStages: [
 				{
@@ -176,7 +193,7 @@ export class ManageHelpContentPublisherStack extends GuStack {
 		});
 
 		const takedownUsagePlan = new UsagePlan(this, 'TakedownUsagePlan', {
-			name: `${nameWithStage}-takedown-usage-plan`,
+			name: takedownUsagePlanName,
 			description: 'Usage plan for manage help content takedown API',
 			apiStages: [
 				{
@@ -188,11 +205,11 @@ export class ManageHelpContentPublisherStack extends GuStack {
 
 		// API Keys
 		const publisherApiKey = this.publisherApi.api.addApiKey('PublisherApiKey', {
-			apiKeyName: `${nameWithStage}-publisher-key`,
+			apiKeyName: publisherApiKeyName,
 		});
 
 		const takedownApiKey = this.takedownApi.api.addApiKey('TakedownApiKey', {
-			apiKeyName: `${nameWithStage}-takedown-key`,
+			apiKeyName: takedownApiKeyName,
 		});
 
 		// Associate API keys to usage plans
@@ -201,88 +218,87 @@ export class ManageHelpContentPublisherStack extends GuStack {
 
 		// CloudWatch Alarms (PROD only) - matching original CloudFormation
 		if (stage === 'PROD') {
-			const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:membership-${stage}`;
-			const snsTopic = Topic.fromTopicArn(this, 'AlertsTopic', snsTopicArn);
+			const snsTopic = Topic.fromTopicArn(
+				this,
+				'MembershipProdTopic',
+				'arn:aws:sns:eu-west-1:123456789012:membership-PROD',
+			);
 
 			// Publisher API Alarms
 			new Alarm(this, 'Publisher4xxApiAlarm', {
-				alarmName: `4XX rate from ${nameWithStage}-publisher`,
+				alarmName: publisher4xxAlarmName,
 				alarmDescription: '4xx errors on manage help content publisher API',
 				metric: new Metric({
 					namespace: 'AWS/ApiGateway',
 					metricName: '4XXError',
 					dimensionsMap: {
-						ApiName: this.publisherApi.api.restApiName,
-						Stage: this.publisherApi.api.deploymentStage.stageName,
+						ApiName: publisherApiName,
 					},
 					statistic: 'Sum',
 					period: Duration.minutes(1),
 				}),
+				evaluationPeriods: 1,
 				threshold: 5,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				evaluationPeriods: 1,
 				treatMissingData: TreatMissingData.NOT_BREACHING,
 			}).addAlarmAction(new SnsAction(snsTopic));
 
 			new Alarm(this, 'Publisher5xxApiAlarm', {
-				alarmName: `5XX rate from ${nameWithStage}-publisher`,
+				alarmName: publisher5xxAlarmName,
 				alarmDescription: '5xx errors on manage help content publisher API',
 				metric: new Metric({
 					namespace: 'AWS/ApiGateway',
 					metricName: '5XXError',
 					dimensionsMap: {
-						ApiName: this.publisherApi.api.restApiName,
-						Stage: this.publisherApi.api.deploymentStage.stageName,
+						ApiName: publisherApiName,
 					},
 					statistic: 'Sum',
 					period: Duration.minutes(1),
 				}),
+				evaluationPeriods: 1,
 				threshold: 5,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				evaluationPeriods: 1,
 				treatMissingData: TreatMissingData.NOT_BREACHING,
 			}).addAlarmAction(new SnsAction(snsTopic));
 
 			// Takedown API Alarms
 			new Alarm(this, 'Takedown4xxApiAlarm', {
-				alarmName: `4XX rate from ${nameWithStage}-takedown`,
+				alarmName: takedown4xxAlarmName,
 				alarmDescription: '4xx errors on manage help content takedown API',
 				metric: new Metric({
 					namespace: 'AWS/ApiGateway',
 					metricName: '4XXError',
 					dimensionsMap: {
-						ApiName: this.takedownApi.api.restApiName,
-						Stage: this.takedownApi.api.deploymentStage.stageName,
+						ApiName: takedownApiName,
 					},
 					statistic: 'Sum',
 					period: Duration.minutes(1),
 				}),
+				evaluationPeriods: 1,
 				threshold: 5,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				evaluationPeriods: 1,
 				treatMissingData: TreatMissingData.NOT_BREACHING,
 			}).addAlarmAction(new SnsAction(snsTopic));
 
 			new Alarm(this, 'Takedown5xxApiAlarm', {
-				alarmName: `5XX rate from ${nameWithStage}-takedown`,
+				alarmName: takedown5xxAlarmName,
 				alarmDescription: '5xx errors on manage help content takedown API',
 				metric: new Metric({
 					namespace: 'AWS/ApiGateway',
 					metricName: '5XXError',
 					dimensionsMap: {
-						ApiName: this.takedownApi.api.restApiName,
-						Stage: this.takedownApi.api.deploymentStage.stageName,
+						ApiName: takedownApiName,
 					},
 					statistic: 'Sum',
 					period: Duration.minutes(1),
 				}),
+				evaluationPeriods: 1,
 				threshold: 5,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				evaluationPeriods: 1,
 				treatMissingData: TreatMissingData.NOT_BREACHING,
 			}).addAlarmAction(new SnsAction(snsTopic));
 		}

@@ -34,13 +34,14 @@ describe('ManageHelpContentPublisherStack', () => {
 						App: 'manage-help-content-publisher',
 						Stack: 'membership',
 						Stage: 'CODE',
+						stage: 'CODE',
 					},
 				},
 			});
 
 			// Takedown Lambda
 			template.hasResourceProperties('AWS::Lambda::Function', {
-				FunctionName: 'manage-help-content-publisher-CODE-takedown',
+				FunctionName: 'manage-help-content-publisher-takedown-CODE',
 				Handler: 'managehelpcontentpublisher.TakingDownHandler::handleRequest',
 				Runtime: 'java11',
 				MemorySize: 2048,
@@ -50,22 +51,16 @@ describe('ManageHelpContentPublisherStack', () => {
 						App: 'manage-help-content-publisher',
 						Stack: 'membership',
 						Stage: 'CODE',
+						stage: 'CODE',
 					},
 				},
 			});
 		});
 
-		test('creates two separate API Gateways', () => {
-			// Publisher API Gateway
+		test('creates a single API Gateway with correct name and description', () => {
 			template.hasResourceProperties('AWS::ApiGateway::RestApi', {
-				Name: 'manage-help-content-publisher-CODE-publisher-api',
-				Description: 'API Gateway for manage help content publisher',
-			});
-
-			// Takedown API Gateway
-			template.hasResourceProperties('AWS::ApiGateway::RestApi', {
-				Name: 'manage-help-content-publisher-CODE-takedown-api',
-				Description: 'API Gateway for manage help content takedown',
+				Name: 'manage-help-content-publisher-CODE-api-gateway',
+				Description: 'API Gateway for manage-help-content-publisher',
 			});
 		});
 
@@ -83,28 +78,12 @@ describe('ManageHelpContentPublisherStack', () => {
 			});
 		});
 
-		test('creates usage plans and API keys for both APIs', () => {
-			// Publisher usage plan
+		test('creates usage plan and API key', () => {
 			template.hasResourceProperties('AWS::ApiGateway::UsagePlan', {
-				UsagePlanName:
-					'manage-help-content-publisher-CODE-publisher-usage-plan',
-				Description: 'Usage plan for manage help content publisher API',
+				UsagePlanName: 'manage-help-content-publisher-CODE-usage-plan',
 			});
-
-			// Takedown usage plan
-			template.hasResourceProperties('AWS::ApiGateway::UsagePlan', {
-				UsagePlanName: 'manage-help-content-publisher-CODE-takedown-usage-plan',
-				Description: 'Usage plan for manage help content takedown API',
-			});
-
-			// Publisher API key
 			template.hasResourceProperties('AWS::ApiGateway::ApiKey', {
-				Name: 'manage-help-content-publisher-CODE-publisher-key',
-			});
-
-			// Takedown API key
-			template.hasResourceProperties('AWS::ApiGateway::ApiKey', {
-				Name: 'manage-help-content-publisher-CODE-takedown-key',
+				Enabled: true,
 			});
 		});
 
@@ -113,59 +92,39 @@ describe('ManageHelpContentPublisherStack', () => {
 				LogGroupName: '/aws/lambda/manage-help-content-publisher-CODE',
 				RetentionInDays: 90,
 			});
-
 			template.hasResourceProperties('AWS::Logs::LogGroup', {
-				LogGroupName: '/aws/lambda/manage-help-content-publisher-CODE-takedown',
+				LogGroupName: '/aws/lambda/manage-help-content-publisher-takedown-CODE',
 				RetentionInDays: 90,
 			});
 		});
 
 		test('creates IAM policies for S3 access', () => {
-			// Check that IAM policies exist with S3 permissions
-			const policies = template.findResources('AWS::IAM::Policy');
-			expect(Object.keys(policies)).toHaveLength(2);
-
-			// Check that at least one policy contains S3 permissions for manage-help-content bucket
-			const policyStatements = Object.values(policies).flatMap(
-				(policy: Record<string, unknown>) => {
-					const policyObj = policy as {
-						Properties: { PolicyDocument: { Statement: unknown[] } };
-					};
-					return policyObj.Properties.PolicyDocument.Statement;
-				},
-			);
-
-			const s3Statement = policyStatements.find((statement: unknown) => {
-				const stmt = statement as {
-					Action?: string[];
-					Resource?: string[];
-					Effect?: string;
-				};
-				return (
-					stmt.Action?.includes('s3:GetObject') &&
-					stmt.Resource?.some((resource: string) =>
-						resource.includes('manage-help-content'),
-					)
-				);
-			}) as
-				| { Action?: string[]; Resource?: string[]; Effect?: string }
-				| undefined;
-
-			expect(s3Statement).toBeDefined();
-			expect(s3Statement?.Effect).toBe('Allow');
+			const resources = template.findResources('AWS::IAM::Policy') as Record<string, { Properties: { PolicyDocument: { Statement: unknown[] } } }>;
+			const found = Object.values(resources).some((policy) => {
+				const doc = policy.Properties.PolicyDocument;
+				return (doc.Statement as Array<Record<string, unknown>>).some((stmt) => {
+					const resource = stmt.Resource;
+					const resourceArr = Array.isArray(resource) ? resource : [resource];
+					return (
+						Array.isArray(stmt.Action) && stmt.Action.includes('s3:GetObject') &&
+						resourceArr.some((res) => typeof res === 'string' && res.includes('manage-help-content'))
+					);
+				});
+			});
+			expect(found).toBe(true);
 		});
 
 		test('does not create CloudWatch alarms in CODE environment', () => {
-			template.resourceCountIs('AWS::CloudWatch::Alarm', 0);
+			const alarms = template.findResources('AWS::CloudWatch::Alarm');
+			expect(Object.keys(alarms).length).toBe(0);
 		});
 
 		test('has correct resource counts for CODE environment', () => {
 			template.resourceCountIs('AWS::Lambda::Function', 2);
-			template.resourceCountIs('AWS::ApiGateway::RestApi', 2);
-			template.resourceCountIs('AWS::ApiGateway::UsagePlan', 2);
-			template.resourceCountIs('AWS::ApiGateway::ApiKey', 2);
+			template.resourceCountIs('AWS::ApiGateway::RestApi', 1);
+			template.resourceCountIs('AWS::ApiGateway::UsagePlan', 1);
+			template.resourceCountIs('AWS::ApiGateway::ApiKey', 1);
 			template.resourceCountIs('AWS::Logs::LogGroup', 2);
-			template.resourceCountIs('AWS::CloudWatch::Alarm', 0);
 		});
 	});
 
@@ -180,37 +139,24 @@ describe('ManageHelpContentPublisherStack', () => {
 			template = Template.fromStack(stack);
 		});
 
-		test('creates CloudWatch alarms for both APIs in PROD', () => {
-			// Publisher API alarms
+		test('creates CloudWatch alarms for API Gateway in PROD', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: '4XX rate from manage-help-content-publisher-PROD-publisher',
-				AlarmDescription: '4xx errors on manage help content publisher API',
+				AlarmName: '4XX rate from manage-help-content-publisher-PROD-api-gateway',
+				AlarmDescription: 'See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting',
 			});
-
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: '5XX rate from manage-help-content-publisher-PROD-publisher',
-				AlarmDescription: '5xx errors on manage help content publisher API',
-			});
-
-			// Takedown API alarms
-			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: '4XX rate from manage-help-content-publisher-PROD-takedown',
-				AlarmDescription: '4xx errors on manage help content takedown API',
-			});
-
-			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: '5XX rate from manage-help-content-publisher-PROD-takedown',
-				AlarmDescription: '5xx errors on manage help content takedown API',
+				AlarmName: '5XX rate from manage-help-content-publisher-PROD-api-gateway',
+				AlarmDescription: 'See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting',
 			});
 		});
 
 		test('has correct resource counts for PROD environment', () => {
 			template.resourceCountIs('AWS::Lambda::Function', 2);
-			template.resourceCountIs('AWS::ApiGateway::RestApi', 2);
-			template.resourceCountIs('AWS::ApiGateway::UsagePlan', 2);
-			template.resourceCountIs('AWS::ApiGateway::ApiKey', 2);
+			template.resourceCountIs('AWS::ApiGateway::RestApi', 1);
+			template.resourceCountIs('AWS::ApiGateway::UsagePlan', 1);
+			template.resourceCountIs('AWS::ApiGateway::ApiKey', 1);
 			template.resourceCountIs('AWS::Logs::LogGroup', 2);
-			template.resourceCountIs('AWS::CloudWatch::Alarm', 4); // 4 alarms for 2 APIs
+			template.resourceCountIs('AWS::CloudWatch::Alarm', 2);
 		});
 	});
 

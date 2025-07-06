@@ -99,17 +99,27 @@ describe('ManageHelpContentPublisherStack', () => {
 		});
 
 		test('creates IAM policies for S3 access', () => {
-			const resources = template.findResources('AWS::IAM::Policy') as Record<string, { Properties: { PolicyDocument: { Statement: unknown[] } } }>;
+			const resources = template.findResources('AWS::IAM::Policy') as Record<
+				string,
+				{ Properties: { PolicyDocument: { Statement: unknown[] } } }
+			>;
 			const found = Object.values(resources).some((policy) => {
 				const doc = policy.Properties.PolicyDocument;
-				return (doc.Statement as Array<Record<string, unknown>>).some((stmt) => {
-					const resource = stmt.Resource;
-					const resourceArr = Array.isArray(resource) ? resource : [resource];
-					return (
-						Array.isArray(stmt.Action) && stmt.Action.includes('s3:GetObject') &&
-						resourceArr.some((res) => typeof res === 'string' && res.includes('manage-help-content'))
-					);
-				});
+				return (doc.Statement as Array<Record<string, unknown>>).some(
+					(stmt) => {
+						const resource = stmt.Resource;
+						const resourceArr = Array.isArray(resource) ? resource : [resource];
+						return (
+							Array.isArray(stmt.Action) &&
+							stmt.Action.includes('s3:GetObject') &&
+							resourceArr.some(
+								(res) =>
+									typeof res === 'string' &&
+									res.includes('manage-help-content'),
+							)
+						);
+					},
+				);
 			});
 			expect(found).toBe(true);
 		});
@@ -141,12 +151,16 @@ describe('ManageHelpContentPublisherStack', () => {
 
 		test('creates CloudWatch alarms for API Gateway in PROD', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: '4XX rate from manage-help-content-publisher-PROD-api-gateway',
-				AlarmDescription: 'See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting',
+				AlarmName:
+					'4XX rate from manage-help-content-publisher-PROD-api-gateway',
+				AlarmDescription:
+					'See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting',
 			});
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: '5XX rate from manage-help-content-publisher-PROD-api-gateway',
-				AlarmDescription: 'See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting',
+				AlarmName:
+					'5XX rate from manage-help-content-publisher-PROD-api-gateway',
+				AlarmDescription:
+					'See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting',
 			});
 		});
 

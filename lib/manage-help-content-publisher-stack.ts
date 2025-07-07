@@ -1,6 +1,6 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
+import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
@@ -66,7 +66,8 @@ export class ManageHelpContentPublisherStack extends GuStack {
 			stage,
 		};
 
-		// Publisher Lambda
+		///////////NEWCODE/////////
+		///////////NEWCODE/////////
 		const publisherLambda = new GuLambdaFunction(this, 'PublisherLambda', {
 			functionName: publisherFunctionName,
 			runtime: Runtime.JAVA_11,
@@ -81,7 +82,6 @@ export class ManageHelpContentPublisherStack extends GuStack {
 				'Codebase: https://github.com/guardian/manage-help-content-publisher.',
 		});
 
-		// Takedown Lambda
 		const takedownLambda = new GuLambdaFunction(this, 'TakedownLambda', {
 			functionName: takedownFunctionName,
 			runtime: Runtime.JAVA_11,
@@ -96,9 +96,8 @@ export class ManageHelpContentPublisherStack extends GuStack {
 				'Codebase: https://github.com/guardian/manage-help-content-publisher.',
 		});
 
-		// API Gateway
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
-			app,
+			app: app,
 			targets: [
 				{
 					path: '/',
@@ -121,11 +120,14 @@ export class ManageHelpContentPublisherStack extends GuStack {
 						}
 					: { noMonitoring: true },
 		});
+		///////////NEWCODE/////////
+		///////////NEWCODE/////////
 
 		// API Key & Usage Plan
 		const apiKey = apiGateway.api.addApiKey(`${app}-${stage}-api-key`, {
 			apiKeyName: `${app}-${stage}-api-key`,
 		});
+
 		const usagePlan = new UsagePlan(this, 'UsagePlan', {
 			name: usagePlanName,
 			apiStages: [

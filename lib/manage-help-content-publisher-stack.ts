@@ -4,7 +4,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { UsagePlan } from 'aws-cdk-lib/aws-apigateway';
+import { IApiKey, UsagePlan } from 'aws-cdk-lib/aws-apigateway';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -29,7 +29,6 @@ export class ManageHelpContentPublisherStack extends GuStack {
 		const takedownLogGroupName = `/aws/lambda/${app}-takedown-${stage}`;
 		const usagePlanName = `${app}-${stage}-usage-plan`;
 
-		// Log groups
 		new LogGroup(this, 'PublisherLogGroup', {
 			logGroupName: publisherLogGroupName,
 			retention: RetentionDays.THREE_MONTHS,
@@ -40,7 +39,7 @@ export class ManageHelpContentPublisherStack extends GuStack {
 		});
 
 		// S3 policies
-		const s3PolicyStatements = [
+		const s3PolicyStatements: PolicyStatement[] = [
 			new PolicyStatement({
 				effect: Effect.ALLOW,
 				actions: ['s3:ListBucket'],
@@ -66,8 +65,6 @@ export class ManageHelpContentPublisherStack extends GuStack {
 			stage,
 		};
 
-		///////////NEWCODE/////////
-		///////////NEWCODE/////////
 		const publisherLambda = new GuLambdaFunction(this, 'PublisherLambda', {
 			functionName: publisherFunctionName,
 			runtime: Runtime.JAVA_11,
@@ -120,15 +117,15 @@ export class ManageHelpContentPublisherStack extends GuStack {
 						}
 					: { noMonitoring: true },
 		});
-		///////////NEWCODE/////////
-		///////////NEWCODE/////////
 
-		// API Key & Usage Plan
-		const apiKey = apiGateway.api.addApiKey(`${app}-${stage}-api-key`, {
-			apiKeyName: `${app}-${stage}-api-key`,
-		});
+		const apiKey: IApiKey = apiGateway.api.addApiKey(
+			`${app}-${stage}-api-key`,
+			{
+				apiKeyName: `${app}-${stage}-api-key`,
+			},
+		);
 
-		const usagePlan = new UsagePlan(this, 'UsagePlan', {
+		const usagePlan: UsagePlan = new UsagePlan(this, 'UsagePlan', {
 			name: usagePlanName,
 			apiStages: [
 				{ api: apiGateway.api, stage: apiGateway.api.deploymentStage },

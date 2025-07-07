@@ -2,7 +2,6 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
 import { ManageHelpContentPublisherStack } from '../lib/manage-help-content-publisher-stack';
-import * as console from 'node:console';
 
 const app = new App();
 
@@ -24,7 +23,5 @@ stages.forEach((stage) => {
 		},
 	);
 });
-
-console.log(process.env);
 
 app.synth();

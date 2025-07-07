@@ -57,10 +57,9 @@ describe('ManageHelpContentPublisherStack', () => {
 			});
 		});
 
-		test('creates a single API Gateway with correct name and description', () => {
+		test('creates a single API Gateway with correct name', () => {
 			template.hasResourceProperties('AWS::ApiGateway::RestApi', {
-				Name: 'manage-help-content-publisher-CODE-api-gateway',
-				Description: 'API Gateway for manage-help-content-publisher',
+				Name: 'membership-CODE-manage-help-content-publisher',
 			});
 		});
 
@@ -149,18 +148,12 @@ describe('ManageHelpContentPublisherStack', () => {
 			template = Template.fromStack(stack);
 		});
 
-		test('creates CloudWatch alarms for API Gateway in PROD', () => {
+		test('creates Guardian 5XX alarm for API Gateway in PROD', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
 				AlarmName:
-					'4XX rate from manage-help-content-publisher-PROD-api-gateway',
+					'High 5XX error percentage from manage-help-content-publisher (ApiGateway) in PROD',
 				AlarmDescription:
-					'See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting',
-			});
-			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName:
-					'5XX rate from manage-help-content-publisher-PROD-api-gateway',
-				AlarmDescription:
-					'See https://github.com/guardian/manage-help-content-publisher/blob/main/README.md#Troubleshooting',
+					'manage-help-content-publisher exceeded 5% error rate',
 			});
 		});
 
@@ -170,7 +163,7 @@ describe('ManageHelpContentPublisherStack', () => {
 			template.resourceCountIs('AWS::ApiGateway::UsagePlan', 1);
 			template.resourceCountIs('AWS::ApiGateway::ApiKey', 1);
 			template.resourceCountIs('AWS::Logs::LogGroup', 2);
-			template.resourceCountIs('AWS::CloudWatch::Alarm', 2);
+			template.resourceCountIs('AWS::CloudWatch::Alarm', 1);
 		});
 	});
 

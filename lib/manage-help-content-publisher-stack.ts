@@ -139,7 +139,13 @@ export class ManageHelpContentPublisherStack extends GuStack {
 		api.root.addMethod('POST', new LambdaIntegration(publisherLambda), {
 			apiKeyRequired: true,
 		});
-		// DELETE /{articlePath} (takedown)
+
+		// Attach DELETE on root for maximum compatibility (fixes API Gateway integration issues)
+		api.root.addMethod('DELETE', new LambdaIntegration(takedownLambda), {
+			apiKeyRequired: true,
+		});
+
+		// Existing dynamic DELETE method
 		api.root
 			.addResource('{articlePath}')
 			.addMethod('DELETE', new LambdaIntegration(takedownLambda), {

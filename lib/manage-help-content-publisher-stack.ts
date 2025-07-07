@@ -4,7 +4,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { IApiKey, UsagePlan } from 'aws-cdk-lib/aws-apigateway';
+import { UsagePlan } from 'aws-cdk-lib/aws-apigateway';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -118,12 +118,9 @@ export class ManageHelpContentPublisherStack extends GuStack {
 					: { noMonitoring: true },
 		});
 
-		const apiKey: IApiKey = apiGateway.api.addApiKey(
-			`${app}-${stage}-api-key`,
-			{
-				apiKeyName: `${app}-${stage}-api-key`,
-			},
-		);
+		const apiKey = apiGateway.api.addApiKey(`${app}-${stage}-api-key`, {
+			apiKeyName: `${app}-${stage}-api-key`,
+		});
 
 		const usagePlan: UsagePlan = new UsagePlan(this, 'UsagePlan', {
 			name: usagePlanName,

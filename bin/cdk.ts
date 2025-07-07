@@ -2,6 +2,7 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
 import { ManageHelpContentPublisherStack } from '../lib/manage-help-content-publisher-stack';
+import * as console from 'node:console';
 
 const app = new App();
 
@@ -15,7 +16,7 @@ stages.forEach((stage) => {
 		{
 			env: {
 				account: process.env.CDK_DEFAULT_ACCOUNT,
-				region: process.env.CDK_DEFAULT_REGION,
+				region: 'eu-west-1',
 			},
 			stage: stage,
 			stack: 'membership',
@@ -23,5 +24,7 @@ stages.forEach((stage) => {
 		},
 	);
 });
+
+console.log(process.env);
 
 app.synth();

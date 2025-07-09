@@ -33,22 +33,17 @@ export class ManageHelpContentPublisherStack extends GuStack {
 			logGroupName: publisherLogGroupName,
 			retention: RetentionDays.THREE_MONTHS,
 		});
+
 		new LogGroup(this, 'TakedownLogGroup', {
 			logGroupName: takedownLogGroupName,
 			retention: RetentionDays.THREE_MONTHS,
 		});
 
-		// S3 policies
-		const s3PolicyStatements: PolicyStatement[] = [
+		const basePolices: PolicyStatement[] = [
 			new PolicyStatement({
 				effect: Effect.ALLOW,
 				actions: ['s3:ListBucket'],
 				resources: ['arn:aws:s3:::manage-help-content*'],
-			}),
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['s3:GetObject', 's3:PutObject'],
-				resources: [`arn:aws:s3:::manage-help-content/${stage}/*`],
 			}),
 			new PolicyStatement({
 				effect: Effect.ALLOW,
@@ -57,7 +52,6 @@ export class ManageHelpContentPublisherStack extends GuStack {
 			}),
 		];
 
-		// Guardian standard environment variables
 		const guardianEnvVars = {
 			App: app,
 			Stack: this.stack,
@@ -74,7 +68,14 @@ export class ManageHelpContentPublisherStack extends GuStack {
 			memorySize: 2048,
 			timeout: Duration.seconds(30),
 			environment: guardianEnvVars,
-			initialPolicy: s3PolicyStatements,
+			initialPolicy: [
+				...basePolices,
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['s3:GetObject', 's3:PutObject'],
+					resources: [`arn:aws:s3:::manage-help-content/${stage}/*`],
+				}),
+			],
 			description:
 				'Codebase: https://github.com/guardian/manage-help-content-publisher.',
 		});
@@ -88,7 +89,14 @@ export class ManageHelpContentPublisherStack extends GuStack {
 			memorySize: 2048,
 			timeout: Duration.seconds(30),
 			environment: guardianEnvVars,
-			initialPolicy: s3PolicyStatements,
+			initialPolicy: [
+				...basePolices,
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
+					resources: [`arn:aws:s3:::manage-help-content/${stage}/*`],
+				}),
+			],
 			description:
 				'Codebase: https://github.com/guardian/manage-help-content-publisher.',
 		});

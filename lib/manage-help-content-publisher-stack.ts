@@ -103,9 +103,6 @@ export class ManageHelpContentPublisherStack extends GuStack {
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app: app,
-			deployOptions: {
-				stageName: stage,
-			},
 			targets: [
 				{
 					path: '/',

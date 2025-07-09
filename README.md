@@ -1,6 +1,7 @@
 # 📚 Manage Help Content Publisher
 
-> 🚀 **Modernized with AWS CDK** - Migrated from CloudFormation to Guardian CDK for enhanced maintainability and best practices
+> 🚀 **Modernized with AWS CDK** - Migrated from CloudFormation to Guardian CDK for enhanced maintainability and best
+> practices
 
 [![Build Status](https://github.com/guardian/manage-help-content-publisher/workflows/CI-manage-help-content-publisher/badge.svg)](https://github.com/guardian/manage-help-content-publisher/actions)
 [![Guardian CDK](https://img.shields.io/badge/Guardian-CDK-blue.svg)](https://github.com/guardian/cdk)
@@ -8,7 +9,10 @@
 
 ## 🎯 Overview
 
-This service publishes Help Centre content from [Salesforce Knowledge](https://gnmtouchpoint.lightning.force.com/lightning/o/Knowledge__kav/list?filterName=00B5I000003lI1KUAU) to [MMA (Manage My Account)](https://manage.theguardian.com/help-centre), providing Guardian readers with up-to-date support documentation.
+This service publishes Help Centre content
+from [Salesforce Knowledge](https://gnmtouchpoint.lightning.force.com/lightning/o/Knowledge__kav/list?filterName=00B5I000003lI1KUAU)
+to [MMA (Manage My Account)](https://manage.theguardian.com/help-centre), providing Guardian readers with up-to-date
+support documentation.
 
 ## 🏗️ Architecture
 
@@ -49,52 +53,6 @@ graph TB
     style API2 fill:#ffebee
 ```
 
-## 🔄 Migration to CDK
-
-This project has been **successfully migrated** from CloudFormation to **Guardian CDK**, bringing:
-
-### ✨ Benefits of CDK Migration
-
-| Feature | Before (CloudFormation) | After (Guardian CDK) |
-|---------|------------------------|---------------------|
-| 🏗️ **Infrastructure** | Static YAML templates | Type-safe TypeScript code |
-| 🧪 **Testing** | Manual validation | 12 automated unit tests |
-| 🔧 **Maintainability** | Complex YAML syntax | Readable, modular code |
-| 📦 **Reusability** | Copy-paste patterns | Guardian CDK constructs |
-| 🛡️ **Type Safety** | Runtime errors | Compile-time validation |
-| 🚀 **Deployment** | Single API Gateway | Dual API Gateway architecture |
-
-### 🎯 Architecture Evolution
-
-```mermaid
-graph LR
-    subgraph "Before: CloudFormation"
-        CF1[📄 cfn.yaml<br/>Static Template]
-        CF2[🔧 Manual Configuration]
-        CF3[⚠️ Runtime Validation]
-    end
-    
-    subgraph "After: Guardian CDK"
-        CDK1[📝 TypeScript Code<br/>Type-safe]
-        CDK2[🧪 Unit Tests<br/>12 passing tests]
-        CDK3[✅ Compile-time Validation]
-        CDK4[🏗️ GuApiLambda Constructs]
-    end
-    
-    CF1 --> CDK1
-    CF2 --> CDK2
-    CF3 --> CDK3
-    CF1 --> CDK4
-    
-    style CF1 fill:#ffebee
-    style CF2 fill:#ffebee
-    style CF3 fill:#ffebee
-    style CDK1 fill:#e8f5e8
-    style CDK2 fill:#e8f5e8
-    style CDK3 fill:#e8f5e8
-    style CDK4 fill:#e8f5e8
-```
-
 ## 🚀 API Endpoints
 
 ### 1. 📝 Publishing Articles
@@ -120,6 +78,7 @@ sequenceDiagram
 ```
 
 **Process:**
+
 - 📄 JSON file for each topic with associated articles → `manage-help-content/topics/`
 - 📄 JSON file for the input article → `manage-help-content/articles/`
 - 🗺️ Updated `sitemap.txt` for SEO
@@ -169,28 +128,6 @@ pnpm install
 
 # 4. Run all checks (lint, test, build)
 pnpm package
-
-# 5. Deploy to CODE environment
-pnpm cdk deploy ManageHelpContentPublisher-CODE
-```
-
-### 🧪 Testing
-
-```bash
-# Run unit tests
-pnpm test
-
-# Run with coverage
-pnpm test -- --coverage
-
-# Type checking
-pnpm type-check
-
-# Linting
-pnpm lint
-
-# Format code
-pnpm format
 ```
 
 ### 📊 Test Coverage
@@ -232,22 +169,22 @@ graph LR
 
 ### 🌍 Environments
 
-| Environment | Purpose | Monitoring |
-|-------------|---------|------------|
-| **CODE** 🧪 | Development & Testing | Basic logging |
-| **PROD** 🌟 | Production | Full CloudWatch alarms + SNS alerts |
+| Environment | Purpose               | Monitoring                          |
+|-------------|-----------------------|-------------------------------------|
+| **CODE** 🧪 | Development & Testing | Basic logging                       |
+| **PROD** 🌟 | Production            | Full CloudWatch alarms + SNS alerts |
 
 ### 📦 Riff-Raff Configuration
 
 The deployment uses a **dual-deployment strategy**:
 
 1. **🏗️ Infrastructure Deployment** (`manage-help-content-publisher-cloudformation`)
-   - Deploys CDK-generated CloudFormation templates
-   - Creates Lambda functions, API Gateways, IAM roles
+    - Deploys CDK-generated CloudFormation templates
+    - Creates Lambda functions, API Gateways, IAM roles
 
 2. **⚡ Lambda Deployment** (`manage-help-content-publisher`)
-   - Uploads compiled JAR files
-   - Updates Lambda function code
+    - Uploads compiled JAR files
+    - Updates Lambda function code
 
 ## 📁 Project Structure
 
@@ -274,11 +211,11 @@ manage-help-content-publisher/
 
 ### 🌐 Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `App` | Application name | `manage-help-content-publisher` |
-| `Stack` | Guardian stack | `membership` |
-| `Stage` | Environment | `CODE` / `PROD` |
+| Variable | Description      | Example                         |
+|----------|------------------|---------------------------------|
+| `App`    | Application name | `manage-help-content-publisher` |
+| `Stack`  | Guardian stack   | `membership`                    |
+| `Stage`  | Environment      | `CODE` / `PROD`                 |
 
 ### 🪣 S3 Buckets
 
@@ -288,6 +225,7 @@ manage-help-content-publisher/
 ### 🔐 IAM Permissions
 
 The Lambda functions have permissions to:
+
 - 📖 **Read** from deployment bucket
 - 📝 **Read/Write/Delete** from content bucket
 - 📋 **List** bucket contents
@@ -296,16 +234,17 @@ The Lambda functions have permissions to:
 
 ### 🚨 CloudWatch Alarms (PROD only)
 
-| Alarm | Threshold | Action |
-|-------|-----------|--------|
+| Alarm                    | Threshold      | Action    |
+|--------------------------|----------------|-----------|
 | **Publisher 4xx Errors** | ≥ 5 errors/min | SNS Alert |
 | **Publisher 5xx Errors** | ≥ 5 errors/min | SNS Alert |
-| **Takedown 4xx Errors** | ≥ 5 errors/min | SNS Alert |
-| **Takedown 5xx Errors** | ≥ 5 errors/min | SNS Alert |
+| **Takedown 4xx Errors**  | ≥ 5 errors/min | SNS Alert |
+| **Takedown 5xx Errors**  | ≥ 5 errors/min | SNS Alert |
 
 ### 📈 Metrics Dashboard
 
 Monitor your APIs through:
+
 - 📊 **CloudWatch Dashboards**
 - 🔍 **API Gateway metrics**
 - ⚡ **Lambda function metrics**
@@ -335,12 +274,12 @@ Monitor your APIs through:
 
 ### 🔍 Common Issues
 
-| Issue | Solution |
-|-------|----------|
+| Issue                   | Solution                                        |
+|-------------------------|-------------------------------------------------|
 | **CDK synthesis fails** | Run `pnpm type-check` to find TypeScript errors |
-| **Tests failing** | Check `pnpm test` output for specific failures |
-| **Deployment errors** | Check Riff-Raff logs and CloudWatch |
-| **API errors** | Monitor CloudWatch alarms and Lambda logs |
+| **Tests failing**       | Check `pnpm test` output for specific failures  |
+| **Deployment errors**   | Check Riff-Raff logs and CloudWatch             |
+| **API errors**          | Monitor CloudWatch alarms and Lambda logs       |
 
 ### 📞 Support
 

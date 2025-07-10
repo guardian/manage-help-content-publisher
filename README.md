@@ -141,39 +141,6 @@ pnpm package
 
 ## 🚀 Deployment
 
-### 🔄 CI/CD Pipeline
-
-```mermaid
-graph LR
-    subgraph "GitHub Actions"
-        PR[📝 Pull Request] --> Common[🧪 Common Job]
-        Common --> Test[✅ Tests]
-        Common --> Lint[🔍 Lint]
-        Common --> Format[💅 Format]
-        
-        Test --> Build[🏗️ CDK Build Job]
-        Build --> Scala[☕ Scala Build]
-        Build --> CDK[📦 CDK Synth]
-        Build --> RR[🚀 Riff-Raff Upload]
-    end
-    
-    RR --> CODE[🧪 CODE Environment]
-    CODE --> PROD[🌟 PROD Environment]
-    
-    style PR fill:#e3f2fd
-    style Common fill:#f3e5f5
-    style Build fill:#e8f5e8
-    style CODE fill:#fff3e0
-    style PROD fill:#ffebee
-```
-
-### 🌍 Environments
-
-| Environment | Purpose               | Monitoring                          |
-|-------------|-----------------------|-------------------------------------|
-| **CODE** 🧪 | Development & Testing | Basic logging                       |
-| **PROD** 🌟 | Production            | Full CloudWatch alarms + SNS alerts |
-
 ### 📦 Riff-Raff Configuration
 
 The deployment uses a **dual-deployment strategy**:
@@ -185,27 +152,6 @@ The deployment uses a **dual-deployment strategy**:
 2. **⚡ Lambda Deployment** (`manage-help-content-publisher`)
     - Uploads compiled JAR files
     - Updates Lambda function code
-
-## 📁 Project Structure
-
-```
-manage-help-content-publisher/
-├── 📂 .github/workflows/     # CI/CD pipelines
-│   └── ci.yml           # Main deployment workflow
-├── 📂 bin/                  # CDK app entry point
-│   └── cdk.ts              # CDK application
-├── 📂 lib/                  # CDK infrastructure code
-│   ├── manage-help-content-publisher-stack.ts
-│   └── manage-help-content-publisher-stack.test.ts
-├── 📂 src/                  # Scala/Java source code
-├── 📂 scripts/              # Utility scripts
-├── 📂 legacy-content-import/ # Legacy import tools
-├── 📄 riff-raff.yaml        # Deployment configuration
-├── 📄 cdk.json             # CDK configuration
-├── 📄 package.json         # Node.js dependencies
-├── 📄 build.sbt            # Scala build configuration
-└── 📄 .nvmrc               # Node.js version
-```
 
 ## 🔧 Configuration
 
@@ -241,15 +187,6 @@ The Lambda functions have permissions to:
 | **Takedown 4xx Errors**  | ≥ 5 errors/min | SNS Alert |
 | **Takedown 5xx Errors**  | ≥ 5 errors/min | SNS Alert |
 
-### 📈 Metrics Dashboard
-
-Monitor your APIs through:
-
-- 📊 **CloudWatch Dashboards**
-- 🔍 **API Gateway metrics**
-- ⚡ **Lambda function metrics**
-- 🪣 **S3 access patterns**
-
 ## 🤝 Contributing
 
 ### 🔄 Development Workflow
@@ -284,13 +221,9 @@ Monitor your APIs through:
 ### 📞 Support
 
 - **📚 Documentation:** [RIFF-RAFF.md](./RIFF-RAFF.md)
-- **🐛 Issues:** GitHub Issues
-- **💬 Team Chat:** Guardian Slack channels
-- **📖 Guardian CDK:** [CDK Documentation](https://github.com/guardian/cdk)
 
 ## 📚 Additional Resources
 
-- **🏗️ [Guardian CDK](https://github.com/guardian/cdk)** - Infrastructure patterns
 - **🚀 [Riff-Raff Documentation](./RIFF-RAFF.md)** - Deployment guide
 - **☁️ [AWS CDK](https://docs.aws.amazon.com/cdk/)** - Official CDK docs
 - **📋 [Salesforce Knowledge](https://gnmtouchpoint.lightning.force.com/)** - Content source
@@ -299,8 +232,6 @@ Monitor your APIs through:
 ---
 
 <div align="center">
-
-**🎉 Successfully migrated to Guardian CDK!**
 
 *Built with ❤️ by the Guardian Membership team*
 

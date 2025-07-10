@@ -220,8 +220,4 @@ The Lambda functions have permissions to:
 
 ---
 
-<div align="center">
 
-*Built with ❤️ by the Guardian Membership team*
-
-</div>

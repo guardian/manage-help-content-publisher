@@ -1,4 +1,4 @@
-name: Build manage-help-content-publisher
+name: CI-manage-help-content-publisher
 
 on:
   pull_request:
@@ -7,39 +7,72 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  CI:
+  common:
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-    name: manage-help-content-publisher build
-    runs-on: ubuntu-latest
+      pull-requests: write
     steps:
-      - name: Env
-        run: env
+      - uses: actions/checkout@v4
+      - run: npm install --global corepack@0.31.0
+      - run: corepack enable
+        shell: bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm run check-formatting
+      - run: pnpm run lint
+      - run: pnpm run test
 
-      - name: Checkout
-        uses: actions/checkout@v4
+  gu-cdk-build:
+    needs: common
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: env
+      - run: npm install --global corepack@0.31.0
+      - run: corepack enable
+        shell: bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm run build
+      - run: pnpm run synth
+      - name: Setup Java and sbt
+        uses: guardian/setup-scala@v1
+
+      - name: Compile and package Lambda
+        run: sbt clean assembly
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: eu-west-1
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          aws-region: eu-west-1
 
-      - name: Setup Java and sbt
-        uses: guardian/setup-scala@v1
-
-      - name: Compile and package project
-        run: sbt clean assembly
-
-      - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v2
+      - uses: guardian/actions-riff-raff@v4
         with:
-          app: manage-help-content-publisher
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          projectName: membership::manage-help-content-publisher
           configPath: ./riff-raff.yaml
+          commentingEnabled: 'true'
           contentDirectories: |
-            cfn:
-              - ./cfn.yaml
+            cdk:
+              - ./cdk.out
             manage-help-content-publisher:
               - ./manage-help-content-publisher.jar

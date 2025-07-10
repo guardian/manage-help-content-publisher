@@ -218,17 +218,6 @@ The Lambda functions have permissions to:
 | **Deployment errors**   | Check Riff-Raff logs and CloudWatch             |
 | **API errors**          | Monitor CloudWatch alarms and Lambda logs       |
 
-### 📞 Support
-
-- **📚 Documentation:** [RIFF-RAFF.md](./RIFF-RAFF.md)
-
-## 📚 Additional Resources
-
-- **🚀 [Riff-Raff Documentation](./RIFF-RAFF.md)** - Deployment guide
-- **☁️ [AWS CDK](https://docs.aws.amazon.com/cdk/)** - Official CDK docs
-- **📋 [Salesforce Knowledge](https://gnmtouchpoint.lightning.force.com/)** - Content source
-- **🌐 [MMA Help Centre](https://manage.theguardian.com/help-centre)** - Published content
-
 ---
 
 <div align="center">

@@ -1,6 +1,5 @@
 package managehelpcontentpublisher
 
-import build.BuildInfo.buildNumber
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
 import ujson.{Obj, Str}
@@ -10,7 +9,7 @@ import scala.jdk.CollectionConverters._
 object Logging {
 
   private def log(context: Context, level: String, otherFields: Obj): Unit =
-    context.getLogger.log(add(add(otherFields, "logLevel" -> level), "build" -> buildNumber).render())
+    context.getLogger.log(add(otherFields, "logLevel" -> level).render())
 
   private def logInfo(context: Context, event: String, fields: Obj): Unit =
     log(context, "INFO", add(fields, "event" -> event))

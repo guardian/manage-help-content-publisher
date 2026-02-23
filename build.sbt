@@ -1,31 +1,14 @@
 import Dependencies._
-import com.gu.riffraff.artifact.BuildInfo
 
-ThisBuild / scalaVersion := "2.13.8"
+ThisBuild / scalaVersion := "2.13.12"
 
 ThisBuild / scalacOptions += "-deprecation"
 
-val buildInfo = Seq(
-  buildInfoPackage := "build",
-  buildInfoKeys ++= {
-    val buildInfo = BuildInfo(baseDirectory.value)
-    Seq[BuildInfoKey](
-      "buildNumber" -> buildInfo.buildIdentifier
-    )
-  }
-)
-
 lazy val root = (project in file("."))
-  .enablePlugins(BuildInfoPlugin, RiffRaffArtifact)
   .settings(
     name := "manage-help-content-publisher",
-    assemblyJarName := s"${name.value}.jar",
-    riffRaffPackageType := assembly.value,
-    riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
-    riffRaffUploadManifestBucket := Option("riffraff-builds"),
-    riffRaffManifestProjectName := s"${name.value}",
-    riffRaffArtifactResources += (file("cfn.yaml"), "cfn/cfn.yaml"),
-    buildInfo,
+    assembly / assemblyJarName := s"${name.value}.jar",
+    assembly / assemblyOutputPath := file(s"${(assembly/assemblyJarName).value}"),
     libraryDependencies ++= Seq(
       http,
       circeCore,

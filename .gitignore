@@ -1,3 +1,33 @@
 .bsp
 .idea
 target
+manage-help-content-publisher.jar
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# CDK
+cdk.out/
+lib/**/*.d.ts
+lib/**/*.js
+lib/**/*.js.map
+bin/**/*.d.ts
+bin/**/*.js
+bin/**/*.js.map
+
+# TypeScript
+dist/
+
+# Migration and development files (do not commit)
+cdk-template-*.yaml
+template-*.yaml
+types.d.ts
+
+# Temporary and test files
+*.tmp
+*.temp
+.DS_Store

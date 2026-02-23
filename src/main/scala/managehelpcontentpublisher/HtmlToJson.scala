@@ -3,6 +3,8 @@ package managehelpcontentpublisher
 import org.jsoup._
 import org.jsoup.nodes._
 import org.jsoup.safety.Safelist
+import ujson.Value
+import upickle.core.LinkedHashMap
 
 import scala.jdk.CollectionConverters._
 
@@ -33,13 +35,13 @@ object HtmlToJson {
     }
 
   private def toJson(e: Element): ujson.Obj = {
-    val obj = ujson.Obj(
+    val htmlAttributes: List[(String, Value)] =
+      e.attributes.asList.asScala.toList.map(attribute => attribute.getKey -> attribute.getValue)
+    val basicAttributes: List[(String, Value)] = List(
       "element" -> transformed(e.tagName),
       "content" -> e.childNodes.asScala.toList.map(htmlToJson)
     )
-    e.attributes.asList.asScala.foldLeft(obj)((acc, attribute) =>
-        acc.copy(acc.value ++ Map(attribute.getKey -> attribute.getValue))
-      )
+    ujson.Obj(LinkedHashMap(basicAttributes ++ htmlAttributes))
   }
 
   private val elementTransformations = Map("strong" -> "b", "em" -> "i")

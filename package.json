@@ -43,5 +43,10 @@
     "setupFilesAfterEnv": [
       "./jest.setup.js"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "flatted": ">=3.4.0"
+    }
   }
 }

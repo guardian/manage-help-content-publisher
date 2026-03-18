@@ -5,6 +5,8 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  minimatch@^9: '>=9.0.7 <10'
+  minimatch@^10: '>=10.2.3'
   flatted: '>=3.4.0'
 
 importers:

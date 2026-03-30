@@ -13,8 +13,8 @@ object Dependencies {
   lazy val jsoup = "org.jsoup" % "jsoup" % "1.22.1"
   lazy val zip = "org.zeroturnaround" % "zt-zip" % "1.15"
   lazy val utest = "com.lihaoyi" %% "utest" % "0.9.5"
-  lazy val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
-  lazy val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.6"
-  lazy val s3 = "software.amazon.awssdk" % "s3" % "2.40.17"
+  lazy val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.4.0"
+  lazy val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.16.1"
+  lazy val s3 = "software.amazon.awssdk" % "s3" % "2.42.15"
   lazy val slf4jNop = "org.slf4j" % "slf4j-nop" % "2.0.17"
 }

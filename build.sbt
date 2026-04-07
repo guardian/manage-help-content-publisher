@@ -2,6 +2,8 @@ import Dependencies._
 
 ThisBuild / scalaVersion := "2.13.18"
 
+ThisBuild / dependencyOverrides ++= nettyOverrides
+
 ThisBuild / scalacOptions += "-deprecation"
 
 lazy val root = (project in file("."))

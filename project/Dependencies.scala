@@ -3,6 +3,7 @@ import sbt._
 object Dependencies {
   val circeVersion = "0.14.15"
   val upickleVersion = "4.4.3"
+  val nettyVersion = "4.1.132.Final" // CVE-2026-33871: CONTINUATION frame flood DoS
 
   lazy val http = "org.scalaj" %% "scalaj-http" % "2.4.2"
   lazy val ujson = "com.lihaoyi" %% "ujson" % upickleVersion

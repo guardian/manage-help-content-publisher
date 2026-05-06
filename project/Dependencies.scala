@@ -13,7 +13,7 @@ object Dependencies {
   lazy val circeCore = "io.circe" %% "circe-core" % circeVersion
   lazy val circeGeneric = "io.circe" %% "circe-generic" % circeVersion
   lazy val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  lazy val jsoup = "org.jsoup" % "jsoup" % "1.22.1"
+  lazy val jsoup = "org.jsoup" % "jsoup" % "1.22.2"
   lazy val zip = "org.zeroturnaround" % "zt-zip" % "1.15"
   lazy val utest = "com.lihaoyi" %% "utest" % "0.9.5"
   lazy val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.4.0"

@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-  val circeVersion = "0.14.15"
+  val circeVersion = "0.14.16"
   val upickleVersion = "4.4.3"
   // CVE-2026-33870: HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
   // CVE-2026-33871: CONTINUATION frame flood DoS

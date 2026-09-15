@@ -1,11 +1,11 @@
 import sbt._
 
 object Dependencies {
-  val circeVersion = "0.14.15"
+  val circeVersion = "0.14.16"
   val upickleVersion = "4.4.3"
   // CVE-2026-33870: HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
   // CVE-2026-33871: CONTINUATION frame flood DoS
-  val nettyVersion = "4.2.15.Final"
+  val nettyVersion = "4.2.17.Final"
 
   lazy val http = "org.scalaj" %% "scalaj-http" % "2.4.2"
   lazy val ujson = "com.lihaoyi" %% "ujson" % upickleVersion
@@ -13,7 +13,7 @@ object Dependencies {
   lazy val circeCore = "io.circe" %% "circe-core" % circeVersion
   lazy val circeGeneric = "io.circe" %% "circe-generic" % circeVersion
   lazy val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  lazy val jsoup = "org.jsoup" % "jsoup" % "1.22.2"
+  lazy val jsoup = "org.jsoup" % "jsoup" % "1.23.1"
   lazy val zip = "org.zeroturnaround" % "zt-zip" % "1.15"
   lazy val utest = "com.lihaoyi" %% "utest" % "0.9.5"
   lazy val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.4.0"

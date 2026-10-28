@@ -5,7 +5,7 @@ object Dependencies {
   val upickleVersion = "4.4.3"
   // CVE-2026-33870: HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
   // CVE-2026-33871: CONTINUATION frame flood DoS
-  val nettyVersion = "4.2.17.Final"
+  val nettyVersion = "4.2.18.Final"
 
   lazy val http = "org.scalaj" %% "scalaj-http" % "2.4.2"
   lazy val ujson = "com.lihaoyi" %% "ujson" % upickleVersion
@@ -19,7 +19,7 @@ object Dependencies {
   lazy val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.4.0"
   lazy val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.16.1"
   lazy val s3 = "software.amazon.awssdk" % "s3" % "2.55.5"
-  lazy val slf4jNop = "org.slf4j" % "slf4j-nop" % "2.0.18"
+  lazy val slf4jNop = "org.slf4j" % "slf4j-nop" % "2.0.20"
 
   lazy val nettyOverrides: Seq[ModuleID] = Seq(
     "io.netty" % "netty-codec-http"                    % nettyVersion,

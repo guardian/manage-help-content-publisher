@@ -1,5 +1,8 @@
 # 📚 Manage Help Content Publisher
 
+> [!WARNING]
+> This repository is deprecated. The Guardian has moved to the new Help Centre, so this application is no longer used. The stack is being removed and the repository will be archived.
+
 > 🚀 **Modernized with AWS CDK** - Migrated from CloudFormation to Guardian CDK for enhanced maintainability and best
 > practices
 
